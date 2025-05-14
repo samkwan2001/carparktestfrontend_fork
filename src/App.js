@@ -25,7 +25,7 @@ function App() {
   
   let interval;
 
-  const API_BASE_URL = 'http://10.107.192.80:7000';  //明確指明localhost     disadvtage: app.js will send to 用戶之後,
+  const API_BASE_URL = 'https://10.107.192.80:7000';  //明確指明localhost     disadvtage: app.js will send to 用戶之後,
   // const API_BASE_URL = `http://${window.location.hostname}:7000`;  
   const backend = axios.create({
     baseURL: API_BASE_URL,
