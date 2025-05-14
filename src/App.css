@@ -1,0 +1,155 @@
+/* react_def_app */
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* welcome */
+#welcome {
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 10px;
+    background-color: #007bff;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+}
+.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* SelectChargingTime */
+#SelectChargingTime {
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+/* button{
+margin-left: 50px;
+margin-right:50px;
+} */
+.parking-spot {
+    padding: 10px;
+    margin: 10px;
+    border: 5px solid #06f65e;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.sym {
+    font-size: 25px;
+}
+
+/* Queuing */
+#Queuing {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.info {
+    display: inline-block;
+    border: 5px solid #06f65e;
+    text-align: left;
+    padding: 10px;
+    margin: 10px;
+}
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ExistingUsing */
+#ExistingUsing {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.info {
+    display: inline-block;
+    border: 5px solid #06f65e;
+    text-align: left;
+    padding: 10px;
+    margin: 10px;
+}
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* FinishCarging */
+  #FinishCarging{
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+  }
+  .title {
+      font-size: 24px;
+      font-weight: bold;
+  }
+  .sentence {
+      font-size: 18px;
+      margin-top: 10px;
+  }
