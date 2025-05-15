@@ -214,8 +214,8 @@ function App() {
             // document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(params[2]< 0?0:params[2]); //用:分隔 ===>  condtion ? ture : false
             const time = (params[2] - new Date(Date.now()).getTime())
             //document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(params[2] - new Date(Date.now()).getTime());   // millis_to_time_String(params[2]) 呢嚿係未來ga時間 轉左做有字個樣 (所謂有字個樣即係有分鐘，有秒咁解)
-            if(time<0&&params[1]==1&&params[4]){
-              const moveing_time = (params[2] - new Date(Date.now()).getTime())
+            if(params[1]==1&&params[4]&&Date.now()<params[4]){
+              const moveing_time = (params[4] - new Date(Date.now()).getTime())
               document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(moveing_time < 0?0:moveing_time)
               queue_endtime=(params[4]);
               document.getElementById("InQueue_state_text").innerHTML="移動中";
