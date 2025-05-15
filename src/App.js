@@ -65,10 +65,9 @@ function App() {
   let eventMTloop=void 0;
   let dont_reload=false;
   let last_useEffect=0;
-  useEffect(() => {
-    
+
+  function after_useEffect(){
     if(useEffect_lock){
-      
       function eventMT(){
         console.log(millis_to_time_String(Date.now()-last_useEffect))
         if(cookie.load("_id")===void 0&&Date.now()-last_useEffect<1500)return;
@@ -124,10 +123,12 @@ function App() {
       
       return;
     }
-    
-    
-    
-    
+  }
+
+
+
+  
+  useEffect(() => {
     useEffect_lock=true;console.log(useEffect_lock);
     console.log("useEffect");
     for (let i = 1; i < 12; i++) console.log(window.location.host + "/" + btoa(i));
@@ -315,7 +316,7 @@ function App() {
     document.getElementById("thankYouMsg").style.color = "white";
     
     updateTotalPrice();
-    
+    after_useEffect();
     // Cleanup interval on component unmount
     return () => {
       try{if(eventSource!==void 0)eventSource.close();}
