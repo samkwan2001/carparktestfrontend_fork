@@ -17,7 +17,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "(start \"backend_pub\" /D \"%cd%/backend\" nodemon index_pub.js ^& pause) && (start \"sse_backend_client\" /D \"C:/Users/Sam/Desktop/jacky_carpark/test_bN_sse\" node sse_backend_client.js ^& pause) && react-scripts start & echo finish & pause",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
