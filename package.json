@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "new_backend",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -8,15 +8,16 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.8.4",
-    "base64-unicode": "^0.0.1",
     "react": "^19.1.0",
     "react-cookies": "^0.1.1",
     "react-dom": "^19.1.0",
+    "react-loading": "^2.0.3",
     "react-scripts": "5.0.1",
+    "react-spinners": "^0.17.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "(start \"backend_pub\" /D \"%cd%/backend\" nodemon index_pub.js ^& pause) && (start \"sse_backend_client\" /D \"C:/Users/Sam/Desktop/jacky_carpark/test_bN_sse\" node sse_backend_client.js ^& pause) && react-scripts start & echo finish & pause",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
