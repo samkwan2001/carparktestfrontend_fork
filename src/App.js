@@ -32,7 +32,7 @@ function App() {
 
   let interval;
 
-  const API_BASE_URL = 'https://carparktest3backend.onrender.com';
+  const API_BASE_URL = 'https://express-flame-two.vercel.app';
   // const API_BASE_URL = `http://${window.location.hostname}:7000`;
   const backend = axios.create({
     baseURL: API_BASE_URL,
