@@ -134,7 +134,7 @@ function App() {
           document.getElementById("welcome")
           && document.getElementById("welcome").style.display != "none"
         ){
-          // cookie.remove("_id");
+          cookie.remove("_id");
           try { if (eventSource !== void 0) eventSource.close(); }
           catch { };
         }
