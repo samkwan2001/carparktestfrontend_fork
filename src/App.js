@@ -115,8 +115,12 @@ function App() {
           } else
             console.log(
               `don't reload
-            ${document.getElementById("SelectChargingTime")}
-            &&${document.getElementById("SelectChargingTime").style.display == "none"}
+            (
+            (${document.getElementById("SelectChargingTime")}
+              && ${document.getElementById("SelectChargingTime").style.display == "none"})
+            || (${document.getElementById("confirmBtn")}
+              && ${document.getElementById("confirmBtn").style.display == "none"})
+            )
             &&
             ${document.getElementById("ExistingUsing_stop_btn")}
             &&${document.getElementById('ExistingUsing_stop_btn').style.display == ''}
@@ -345,8 +349,12 @@ function App() {
         } else
           console.log(
             `don't fetchData
-            ${document.getElementById("SelectChargingTime")}
-            &&${document.getElementById("SelectChargingTime").style.display == "none"}
+            (
+            (${document.getElementById("SelectChargingTime")}
+              && ${document.getElementById("SelectChargingTime").style.display == "none"})
+            || (${document.getElementById("confirmBtn")}
+              && ${document.getElementById("confirmBtn").style.display == "none"})
+            )
             &&
             ${document.getElementById("ExistingUsing_stop_btn")}
             &&${document.getElementById('ExistingUsing_stop_btn').style.display == ''}
