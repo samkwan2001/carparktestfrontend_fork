@@ -77,7 +77,8 @@ function App() {
     if (useEffect_lock) {
       function eventMT() {
         console.log(millis_to_time_String(Date.now() - last_useEffect))
-        if (cookie.load("_id") === void 0 && Date.now() - last_useEffect < 1500) return;
+        // if (cookie.load("_id") === void 0 && Date.now() - last_useEffect < 1500) return;
+        if (cookie.load("_id") === void 0) return;
         else clearInterval(eventMTloop);
         eventSource = new EventSource(`${API_BASE_URL}/events?_id="${cookie.load("_id")}"`);
         console.log("eventSource", eventSource);
