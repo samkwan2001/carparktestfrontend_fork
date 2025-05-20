@@ -141,7 +141,7 @@ function App() {
         ){
           try { if (eventSource !== void 0) {
                   eventSource.close();
-                  eventSource=NULL;
+                  eventSource=null;
                   cookie.remove("_id");
                 }
               }
