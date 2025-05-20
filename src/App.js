@@ -139,7 +139,8 @@ function App() {
           document.getElementById("welcome")
           && document.getElementById("welcome").style.display != "none"
         ){
-          try { if (eventSource !== void 0) {
+          try { if(cookie.load("_id"))fetch(`${API_BASE_URL}/close_${cookie.load("_id")}`);
+                if (eventSource !== void 0) {
                   eventSource.close();
                   eventSource=null;
                   cookie.remove("_id");
