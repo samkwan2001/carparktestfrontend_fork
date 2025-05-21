@@ -149,8 +149,9 @@ function App() {
           try { if(cookie.load("_id")){
                   fetch(`${API_BASE_URL}/close_${cookie.load("_id")}`)
                     .then((...args)=>{
-                      cookie.remove("_id");
+                      // cookie.remove("_id");
                     })
+                    cookie.remove("_id");
                   }
                 if (eventSource !== void 0) {
                   eventSource.close();
