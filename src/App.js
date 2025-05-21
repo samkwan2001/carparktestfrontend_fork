@@ -80,57 +80,64 @@ function App() {
         // if (cookie.load("_id") === void 0 && Date.now() - last_useEffect < 1500) return;
         if (cookie.load("_id") === void 0) return;
         else clearInterval(eventMTloop);
-        eventSource = new EventSource(`${API_BASE_URL}/events?_id="${cookie.load("_id")}"`);
-        console.log("eventSource", eventSource);
-        eventSource.onmessage = (event) => {
-          const data = (event.data);
-          console.log('接收到事件:', event.type);
-          console.log('接收到事件數據:', data);
-          console.log("exception:", data.exception)
-          if ((
-            (document.getElementById("SelectChargingTime")
-              && document.getElementById("SelectChargingTime").style.display == "none")
-            || (document.getElementById("confirmBtn")
-              && document.getElementById("confirmBtn").style.display == "none")
-          )
-            &&
-            document.getElementById("ExistingUsing_stop_btn")
-            && document.getElementById('ExistingUsing_stop_btn').style.display == ''
-            &&
-            document.getElementById("cancelbtn")
-            && document.getElementById("cancelbtn").style.display == ""
-            // !dont_reload
-          ) {
-            console.log(event.data);
-            console.log(event.data == "reload");
-            console.log(event.data == "fetchData");
-            if (event.data == "reload") {
-              console.log("reload");
-              redirectToNextPage();
-            }
-            if (event.data == "fetchData") {
-              console.log("fetchData");
-              fetchData();
-            }
-          } else
-            console.log(
-              `don't reload
-            (
-            (${document.getElementById("SelectChargingTime")}
-              && ${document.getElementById("SelectChargingTime").style.display == "none"})
-            || (${document.getElementById("confirmBtn")}
-              && ${document.getElementById("confirmBtn").style.display == "none"})
+        function start_eventSource(){
+          eventSource = new EventSource(`${API_BASE_URL}/events?_id="${cookie.load("_id")}"`);
+          console.log("eventSource", eventSource);
+          eventSource.onmessage = (event) => {
+            const data = (event.data);
+            console.log('接收到事件:', event.type);
+            console.log('接收到事件數據:', data);
+            console.log("exception:", data.exception)
+            if ((
+              (document.getElementById("SelectChargingTime")
+                && document.getElementById("SelectChargingTime").style.display == "none")
+              || (document.getElementById("confirmBtn")
+                && document.getElementById("confirmBtn").style.display == "none")
             )
-            &&
-            ${document.getElementById("ExistingUsing_stop_btn")}
-            &&${document.getElementById('ExistingUsing_stop_btn').style.display == ''}
-            &&
-            ${document.getElementById("cancelbtn")}
-            &&${document.getElementById("cancelbtn").style.display == ""}
-              `
-            );
-        };
-
+              &&
+              document.getElementById("ExistingUsing_stop_btn")
+              && document.getElementById('ExistingUsing_stop_btn').style.display == ''
+              &&
+              document.getElementById("cancelbtn")
+              && document.getElementById("cancelbtn").style.display == ""
+              // !dont_reload
+            ) {
+              console.log(event.data);
+              console.log(event.data == "reload");
+              console.log(event.data == "fetchData");
+              if (event.data == "reload") {
+                console.log("reload");
+                redirectToNextPage();
+              }
+              if (event.data == "fetchData") {
+                console.log("fetchData");
+                fetchData();
+              }
+            } else
+              console.log(
+                `don't reload
+              (
+              (${document.getElementById("SelectChargingTime")}
+                && ${document.getElementById("SelectChargingTime").style.display == "none"})
+              || (${document.getElementById("confirmBtn")}
+                && ${document.getElementById("confirmBtn").style.display == "none"})
+              )
+              &&
+              ${document.getElementById("ExistingUsing_stop_btn")}
+              &&${document.getElementById('ExistingUsing_stop_btn').style.display == ''}
+              &&
+              ${document.getElementById("cancelbtn")}
+              &&${document.getElementById("cancelbtn").style.display == ""}
+                `
+              );
+          };
+          eventSource.onerror = (error) => {
+            console.log(`eventSource error: ${error}`);
+            start_eventSource();
+            console.log(`start_eventSource finfsh`);
+          };
+        }
+        start_eventSource();
       }
       eventMTloop = setInterval(eventMT, 500);
       last_useEffect = Date.now()
