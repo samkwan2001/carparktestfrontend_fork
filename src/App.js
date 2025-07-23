@@ -43,6 +43,7 @@ const translations = {
     thankYou: "感謝閣下使用，請拔除充電接收器，謝謝！",
     chargingFinished: "充電已完成",
     notYourSpot: "此車位已經有其他使用者使用!",
+    dialog_pack_not_available:"充電系統暫時不可用",
   },
   en: {
     welcome: "Welcome",
@@ -74,6 +75,7 @@ const translations = {
     thankYou: "Thank you for using our service, please unplug the charging receiver!",
     chargingFinished: "Charging completed",
     notYourSpot: "This parking space is already in use by another user!",
+    dialog_pack_not_available:"Charging system temporarily unavailable",
   },
 };
 
@@ -186,7 +188,11 @@ function App() {
           console.log('接收到事件:', event.type);
           console.log('接收到事件數據:', data);
                         console.log("exception:", data.exception)
-          if ((
+          if(event.data=="pack_is_available"){
+            if(document.getElementById("pack_not_available_dialog"))document.getElementById("pack_not_available_dialog").close();
+          }else if(event.data=="pack_not_available"){
+            if(document.getElementById("pack_not_available_dialog"))document.getElementById("pack_not_available_dialog").showModal();
+          }else if ((
                 (document.getElementById("SelectChargingTime")
                     && document.getElementById("SelectChargingTime").style.display == "none")
                 || (document.getElementById("confirmBtn")
@@ -273,6 +279,13 @@ function App() {
     if (useEffect_lock) return;
     useEffect_lock = true; console.log(useEffect_lock);
     console.log("useEffect");
+    // backend.get("/is_pack_available").catch(console.log).then(console.log).finally(console.log);
+    backend.get("/is_pack_available").then((response)=>{
+      if(!response.data)
+        if(document.getElementById("pack_not_available_dialog"))
+          document.getElementById("pack_not_available_dialog").showModal();
+    });
+    if(document.getElementById("pack_not_available_dialog"))
     document.getElementById("loading繼續").style.height = document.getElementById("after_cookie").style.height;
     console.log(document.getElementById("after_cookie").style);
     for (let i = 1; i < 12; i++) console.log(window.location.host + "/" + btoa(i));
@@ -872,6 +885,22 @@ function App() {
           <div class="info">{translations[language].parkingSpace.replace('{carNum}', carNum)}</div>
           <p>{translations[language].notYourSpot}</p>
         </div-top>
+        <dialog id="pack_not_available_dialog">
+        <div style={{ position: 'absolute', top: '10px', right: '10px', display: showLanguageButton ? 'block' : 'none' }}>
+          <button onClick={toggleLanguage}>
+            {language === 'zh' ? 'Switch to English' : '切換到中文'}
+          </button>
+        </div>
+        <h1>{translations[language].dialog_pack_not_available}</h1>
+          <ClipLoader
+                color="#ff00ba"
+                loading={true}
+                cssOverride={override}
+                size={64}
+                aria-label="Loading Spinner"
+                data-testid="loader"
+              />
+        </dialog>
       </header>
     </div>
   );
