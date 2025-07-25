@@ -279,7 +279,7 @@ function App() {
   let fetchData = void 0;
   function close_dialog(dialog){
     programed_close=true;
-    e.target.close()
+    dialog.close()
   }
   function ondialogclose(e){
     if(!programed_close)e.target.showModal()
