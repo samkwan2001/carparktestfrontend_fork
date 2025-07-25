@@ -43,7 +43,7 @@ const translations = {
     thankYou: "感謝閣下使用，請拔除充電接收器，謝謝！",
     chargingFinished: "充電已完成",
     notYourSpot: "此車位已經有其他使用者使用!",
-    dialog_pack_not_available:"充電系統暫時不可用",
+    dialog_pack_not_available: "充電系統暫時不可用",
   },
   en: {
     welcome: "Welcome",
@@ -75,7 +75,7 @@ const translations = {
     thankYou: "Thank you for using our service, please unplug the charging receiver!",
     chargingFinished: "Charging completed",
     notYourSpot: "This parking space is already in use by another user!",
-    dialog_pack_not_available:"Charging system temporarily unavailable",
+    dialog_pack_not_available: "Charging system temporarily unavailable",
   },
 };
 
@@ -92,13 +92,13 @@ function App() {
   });
   // New: State to control visibility of language toggle button
   const [showLanguageButton, setShowLanguageButton] = useState(true);
-  
+
   // Function to toggle language
   let countdown_loop = () => { console.warn("empty countdown_loop"); };
   const toggleLanguage = () => {
     setLanguage(language === 'zh' ? 'en' : 'zh');
     // New: Hide language button when switching to English
-  if (language === 'zh') {
+    if (language === 'zh') {
       setShowLanguageButton(false);
     }
     console.log("updateTotalPrice");
@@ -135,7 +135,7 @@ function App() {
   }
   async function getMongo_userState(_carNum) {
     console.log("_carNum" + _carNum);
-    while(1){
+    while (1) {
       try {
         let output = [];
         const carNum_response = await backend.get("/", {
@@ -159,13 +159,13 @@ function App() {
     let millis = durationInMillis % 1000;
     let second = (durationInMillis / 1000) % 60;
     let minute = (durationInMillis / (1000 * 60));
-    console.log("millis_to_time_String",language)
+    console.log("millis_to_time_String", language)
     let time = language === 'zh'
       ? `${Math.floor(minute)}分鐘 ${Math.floor(second)}秒`
       : `${Math.floor(minute)} min ${Math.floor(second)} sec`;
     return time;
   }
-  
+
   let useEffect_lock = false;
   let eventSource = void 0;
   let eventMTloop = void 0;
@@ -176,52 +176,50 @@ function App() {
     if (useEffect_lock) {
       function eventMT() {
         console.log(millis_to_time_String(Date.now() - last_useEffect));
-        if (cookie.load("_id") === void 0 
+        if (cookie.load("_id") === void 0
           // && Date.now() - last_useEffect < 1500
-          ) return;
+        ) return;
         else clearInterval(eventMTloop);
-                function start_eventSource() {
-        eventSource = new EventSource(`${API_BASE_URL}/events?_id="${cookie.load("_id")}"`);
-        console.log("eventSource", eventSource);
-        eventSource.onmessage = (event) => {
-          const data = (event.data);
-          console.log('接收到事件:', event.type);
-          console.log('接收到事件數據:', data);
-                        console.log("exception:", data.exception)
-          if(event.data == "reconnect"){
-            start_eventSource();
-          }else if(event.data == "pack_is_available"){
-            if(document.getElementById("pack_not_available_dialog"))close_dialog(document.getElementById("pack_not_available_dialog"));
-          }else if(event.data == "pack_not_available"){
-            if(document.getElementById("pack_not_available_dialog"))document.getElementById("pack_not_available_dialog").showModal();
-          }else if ((
-                (document.getElementById("SelectChargingTime")
-                    && document.getElementById("SelectChargingTime").style.display == "none")
-                || (document.getElementById("confirmBtn")
-                    && document.getElementById("confirmBtn").style.display == "none")
+        function start_eventSource() {
+          eventSource = new EventSource(`${API_BASE_URL}/events?_id="${cookie.load("_id")}"`);
+          console.log("eventSource", eventSource);
+          eventSource.onmessage = (event) => {
+            const data = (event.data);
+            console.log('接收到事件:', event.type);
+            console.log('接收到事件數據:', data);
+            console.log("exception:", data.exception)
+            if (event.data == "pack_is_available") {
+              if (document.getElementById("pack_not_available_dialog")) close_dialog(document.getElementById("pack_not_available_dialog"));
+            } else if (event.data == "pack_not_available") {
+              if (document.getElementById("pack_not_available_dialog")) document.getElementById("pack_not_available_dialog").showModal();
+            } else if ((
+              (document.getElementById("SelectChargingTime")
+                && document.getElementById("SelectChargingTime").style.display == "none")
+              || (document.getElementById("confirmBtn")
+                && document.getElementById("confirmBtn").style.display == "none")
             )
-                &&
-                document.getElementById("ExistingUsing_stop_btn")
-                && document.getElementById('ExistingUsing_stop_btn').style.display == ''
-                &&
-                document.getElementById("cancelbtn")
-                && document.getElementById("cancelbtn").style.display == ""
-                // !dont_reload
+              &&
+              document.getElementById("ExistingUsing_stop_btn")
+              && document.getElementById('ExistingUsing_stop_btn').style.display == ''
+              &&
+              document.getElementById("cancelbtn")
+              && document.getElementById("cancelbtn").style.display == ""
+              // !dont_reload
             ) {
-            console.log(event.data);
-            console.log(event.data == "reload");
-            console.log(event.data == "fetchData");
-            if (event.data == "reload") {
-              console.log("reload");
-              redirectToNextPage();
-            }
-            if (event.data == "fetchData") {
-              console.log("fetchData");
-              fetchData();
-            }
-          } else
-            console.log(
-                                `don't reload
+              console.log(event.data);
+              console.log(event.data == "reload");
+              console.log(event.data == "fetchData");
+              if (event.data == "reload") {
+                console.log("reload");
+                redirectToNextPage();
+              }
+              if (event.data == "fetchData") {
+                console.log("fetchData");
+                fetchData();
+              }
+            } else
+              console.log(
+                `don't reload
               (
               (${document.getElementById("SelectChargingTime")}
                 && ${document.getElementById("SelectChargingTime").style.display == "none"})
@@ -235,56 +233,62 @@ function App() {
               ${document.getElementById("cancelbtn")}
               &&${document.getElementById("cancelbtn").style.display == ""}
                 `
-                            );
-        };
-                    eventSource.onerror = (error) => {
-                        console.log(`eventSource error: ${error}`);
-                        start_eventSource();
-                        console.log(`start_eventSource finfsh`);
-                    };
-                }
-                start_eventSource();
+              );
+          };
+          eventSource.onerror = (error) => {
+            console.log(`eventSource error: ${error}`);
+            start_eventSource();
+            console.log(`start_eventSource finfsh`);
+          };
+          
+          eventSource.addEventListener('reconnect', (event) => {
+            eventSource.close();
+            console.log("reconnect",new Date(), ":", event.type);
+            start_eventSource();
+          });
+        }
+        start_eventSource();
       }
       eventMTloop = setInterval(eventMT, 500);
-            last_useEffect = Date.now()
+      last_useEffect = Date.now()
       window.onbeforeunload = function () {
         if (
           document.getElementById("welcome")
           && document.getElementById("welcome").style.display != "none"
-                ) {
-                    try {
-                        if (cookie.load("_id")) {
-                            fetch(`${API_BASE_URL}/close?_id="${cookie.load("_id")}"`)
-                                .then((...args) => {
-                                    // cookie.remove("_id");
-                                })
-                            cookie.remove("_id");
-                        }
-                        if (eventSource !== void 0) {
-                            eventSource.close();
-                            eventSource = null;
-                            // cookie.remove("_id");
-                        }
-                    }
-                    catch { };
-                }
+        ) {
+          try {
+            if (cookie.load("_id")) {
+              fetch(`${API_BASE_URL}/close?_id="${cookie.load("_id")}"`)
+                .then((...args) => {
+                  // cookie.remove("_id");
+                })
+              cookie.remove("_id");
             }
+            if (eventSource !== void 0) {
+              eventSource.close();
+              eventSource = null;
+              // cookie.remove("_id");
+            }
+          }
+          catch { };
+        }
+      }
 
 
       return;
     }
   }
 
-  let programed_close=false;
+  let programed_close = false;
   let fetchData = void 0;
-  function close_dialog(dialog){
-    programed_close=true;
+  function close_dialog(dialog) {
+    programed_close = true;
     dialog.close()
   }
-  function ondialogclose(e){
-    if(!programed_close)e.target.showModal()
-    else programed_close=false;
-    console.log(e,e.target.closedBy,e.target.open)
+  function ondialogclose(e) {
+    if (!programed_close) e.target.showModal()
+    else programed_close = false;
+    console.log(e, e.target.closedBy, e.target.open)
     // fetch(`/return?event=${e}`)
   }
   useEffect(() => {
@@ -293,14 +297,14 @@ function App() {
     useEffect_lock = true; console.log(useEffect_lock);
     console.log("useEffect");
     // backend.get("/is_pack_available").catch(console.log).then(console.log).finally(console.log);
-    
-    backend.get("/is_pack_available").then((response)=>{
-      if(!response.data)
-        if(document.getElementById("pack_not_available_dialog"))
+
+    backend.get("/is_pack_available").then((response) => {
+      if (!response.data)
+        if (document.getElementById("pack_not_available_dialog"))
           document.getElementById("pack_not_available_dialog").showModal();
     });
-    if(document.getElementById("pack_not_available_dialog"))
-    document.getElementById("loading繼續").style.height = document.getElementById("after_cookie").style.height;
+    if (document.getElementById("pack_not_available_dialog"))
+      document.getElementById("loading繼續").style.height = document.getElementById("after_cookie").style.height;
     console.log(document.getElementById("after_cookie").style);
     for (let i = 1; i < 12; i++) console.log(window.location.host + "/" + btoa(i));
     console.log(window.location.pathname);
@@ -477,22 +481,22 @@ function App() {
       if (document.getElementById("There are x minutes left to start charging")) {
         if (newTime && newTime > 0)
           // document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(newTime);
-        // else document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(0);
-        // New: Update stored queue or moving time
-        setDynamicValues(prev => ({
-          ...prev,
-          [prev.movingTime != null ? 'movingTime' : 'queueTime']: newTime < 0 ? 0 : newTime,
-        }));
+          // else document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(0);
+          // New: Update stored queue or moving time
+          setDynamicValues(prev => ({
+            ...prev,
+            [prev.movingTime != null ? 'movingTime' : 'queueTime']: newTime < 0 ? 0 : newTime,
+          }));
       }
       if (document.getElementById("You need to wait x minutes")) {
         if (newTime && newTime > 0)
           // document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(newTime);
-        // else document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(0);
-        // New: Update stored queue time
-        setDynamicValues(prev => ({
-          ...prev,
-          queueTime: newTime < 0 ? 0 : newTime,
-        }));
+          // else document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(0);
+          // New: Update stored queue time
+          setDynamicValues(prev => ({
+            ...prev,
+            queueTime: newTime < 0 ? 0 : newTime,
+          }));
       }
       if (newTime && newTime < 0 && cookie.load("_id")) {
         if ((
@@ -526,8 +530,8 @@ function App() {
             &&${document.getElementById("cancelbtn").style.display == ""}
               `
           );
-        }
-        console.log("interval");
+      }
+      console.log("interval");
     };
     interval = setInterval(countdown_loop, 1000);
     document.getElementById("confirmText").style.display = "none";
@@ -546,7 +550,8 @@ function App() {
   }, []);
 
   // New: useEffect to update dynamic text when language changes
-  useEffect(() => {console.log("useEffect language dynamicValues",)
+  useEffect(() => {
+    console.log("useEffect language dynamicValues",)
     // Update document title
     const carNum_base64 = window.location.pathname.substring(1);
     document.title = translations[language].parkingSpace.replace('{carNum}', atob(carNum_base64));
@@ -591,7 +596,7 @@ function App() {
 
     // Update total price
     updateTotalPrice();
-    
+
   }, [language, dynamicValues]);
 
   function goto(v) {
@@ -900,20 +905,20 @@ function App() {
           <p>{translations[language].notYourSpot}</p>
         </div-top>
         <dialog id="pack_not_available_dialog" onClose={ondialogclose}>
-        <div style={{ position: 'absolute', top: '10px', right: '10px', display: showLanguageButton ? 'block' : 'none' }}>
-          <button onClick={toggleLanguage}>
-            {language === 'zh' ? 'Switch to English' : '切換到中文'}
-          </button>
-        </div>
-        <h1>{translations[language].dialog_pack_not_available}</h1>
+          <div style={{ position: 'absolute', top: '10px', right: '10px', display: showLanguageButton ? 'block' : 'none' }}>
+            <button onClick={toggleLanguage}>
+              {language === 'zh' ? 'Switch to English' : '切換到中文'}
+            </button>
+          </div>
+          <h1>{translations[language].dialog_pack_not_available}</h1>
           <ClipLoader
-                color="#ff00ba"
-                loading={true}
-                cssOverride={override}
-                size={64}
-                aria-label="Loading Spinner"
-                data-testid="loader"
-              />
+            color="#ff00ba"
+            loading={true}
+            cssOverride={override}
+            size={64}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+          />
         </dialog>
       </header>
     </div>
