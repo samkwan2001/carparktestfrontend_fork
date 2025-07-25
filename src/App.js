@@ -279,15 +279,14 @@ function App() {
     }
   }
 
-  let programed_close = false;
   let fetchData = void 0;
   function close_dialog(dialog) {
-    programed_close = true;
+    document.getElementById("pack_not_available_dialog")["programed_close"] = true;
     dialog.close()
   }
   function ondialogclose(e) {
-    if (!programed_close) e.target.showModal()
-    else programed_close = false;
+    if (!document.getElementById("pack_not_available_dialog")["programed_close"]) e.target.showModal()
+    else document.getElementById("pack_not_available_dialog")["programed_close"] = false;
     console.log(e, e.target.closedBy, e.target.open)
     // fetch(`/return?event=${e}`)
   }
@@ -297,7 +296,8 @@ function App() {
     useEffect_lock = true; console.log(useEffect_lock);
     console.log("useEffect");
     // backend.get("/is_pack_available").catch(console.log).then(console.log).finally(console.log);
-
+    
+    document.getElementById("pack_not_available_dialog")["programed_close"] = false;
     backend.get("/is_pack_available").then((response) => {
       if (!response.data)
         if (document.getElementById("pack_not_available_dialog"))
