@@ -188,9 +188,11 @@ function App() {
           console.log('接收到事件:', event.type);
           console.log('接收到事件數據:', data);
                         console.log("exception:", data.exception)
-          if(event.data=="pack_is_available"){
-            if(document.getElementById("pack_not_available_dialog"))document.getElementById("pack_not_available_dialog").close();
-          }else if(event.data=="pack_not_available"){
+          if(event.data == "reconnect"){
+            start_eventSource();
+          }else if(event.data == "pack_is_available"){
+            if(document.getElementById("pack_not_available_dialog"))close_dialog(document.getElementById("pack_not_available_dialog"));
+          }else if(event.data == "pack_not_available"){
             if(document.getElementById("pack_not_available_dialog"))document.getElementById("pack_not_available_dialog").showModal();
           }else if ((
                 (document.getElementById("SelectChargingTime")
@@ -273,13 +275,25 @@ function App() {
     }
   }
 
+  let programed_close=false;
   let fetchData = void 0;
+  function close_dialog(dialog){
+    programed_close=true;
+    e.target.close()
+  }
+  function ondialogclose(e){
+    if(!programed_close)e.target.showModal()
+    else programed_close=false;
+    console.log(e,e.target.closedBy,e.target.open)
+    // fetch(`/return?event=${e}`)
+  }
   useEffect(() => {
     // updateTotalPrice()
     if (useEffect_lock) return;
     useEffect_lock = true; console.log(useEffect_lock);
     console.log("useEffect");
     // backend.get("/is_pack_available").catch(console.log).then(console.log).finally(console.log);
+    
     backend.get("/is_pack_available").then((response)=>{
       if(!response.data)
         if(document.getElementById("pack_not_available_dialog"))
@@ -885,7 +899,7 @@ function App() {
           <div class="info">{translations[language].parkingSpace.replace('{carNum}', carNum)}</div>
           <p>{translations[language].notYourSpot}</p>
         </div-top>
-        <dialog id="pack_not_available_dialog">
+        <dialog id="pack_not_available_dialog" onClose={ondialogclose}>
         <div style={{ position: 'absolute', top: '10px', right: '10px', display: showLanguageButton ? 'block' : 'none' }}>
           <button onClick={toggleLanguage}>
             {language === 'zh' ? 'Switch to English' : '切換到中文'}
