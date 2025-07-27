@@ -44,6 +44,7 @@ const translations = {
     chargingFinished: "充電已完成",
     notYourSpot: "此車位已經有其他使用者使用!",
     dialog_pack_not_available: "充電系統暫時不可用",
+    please_rescan_the_QR_code: "請重新掃描二維碼",
   },
   en: {
     welcome: "Welcome",
@@ -76,8 +77,28 @@ const translations = {
     chargingFinished: "Charging completed",
     notYourSpot: "This parking space is already in use by another user!",
     dialog_pack_not_available: "Charging system temporarily unavailable",
+    please_rescan_the_QR_code: "Please rescan the QR code",
   },
 };
+var isEventSupported = (function(){
+  var TAGNAMES = {
+    'select':'input','change':'input',
+    'submit':'form','reset':'form',
+    'error':'img','load':'img','abort':'img'
+  }
+  function isEventSupported(eventName) {
+    var el = document.createElement(TAGNAMES[eventName] || 'div');
+    eventName = 'on' + eventName;
+    var isSupported = (eventName in el);
+    if (!isSupported) {
+      el.setAttribute(eventName, 'return;');
+      isSupported = typeof el[eventName] == 'function';
+    }
+    el = null;
+    return isSupported;
+  }
+  return isEventSupported;
+})();
 
 function App() {
   // State for current language
@@ -123,7 +144,7 @@ function App() {
   let [carNum, setcarNum] = useState("");
 
   let interval;
-
+  let not_time_to_fetchData = true; // Flag to control data fetching timing
   // const API_BASE_URL = 'https://carparkvercelbackend.vercel.app';
   const API_BASE_URL = 'https://express-flame-two.vercel.app';
   const backend = axios.create({
@@ -137,6 +158,8 @@ function App() {
     console.log("_carNum" + _carNum);
     while (1) {
       try {
+        console.log("try time get data from backend");
+        if(not_time_to_fetchData)throw new Error("not time to fetchData");
         let output = [];
         const carNum_response = await backend.get("/", {
           params: {
@@ -149,6 +172,10 @@ function App() {
         return carNum_response.data;
       } catch (error) {
         console.error('Error fetching data: ', error);
+        if(sessionStorage.getItem("finished")!==null){
+          console.log("stop getMongo_userState because sessionStorage finished");
+          throw new Error("Promise rejected: sessionStorage finished");
+        }
         await sleep(1000);
         // throw error;
       }
@@ -175,6 +202,10 @@ function App() {
   function after_useEffect() {
     if (useEffect_lock) {
       function eventMT() {
+        if(sessionStorage.getItem("finished")!==null){
+          console.log("stop eventMT because sessionStorage finished");
+          clearInterval(eventMTloop);
+        }
         console.log(millis_to_time_String(Date.now() - last_useEffect));
         if (cookie.load("_id") === void 0
           // && Date.now() - last_useEffect < 1500
@@ -190,8 +221,10 @@ function App() {
             console.log("exception:", data.exception)
             if (event.data == "pack_is_available") {
               if (document.getElementById("pack_not_available_dialog")) close_dialog(document.getElementById("pack_not_available_dialog"));
+              not_time_to_fetchData = false;console.log("pack_is_available", not_time_to_fetchData);
             } else if (event.data == "pack_not_available") {
               if (document.getElementById("pack_not_available_dialog")) document.getElementById("pack_not_available_dialog").showModal();
+              not_time_to_fetchData = true;console.log("pack_not_available", not_time_to_fetchData);
             } else if ((
               (document.getElementById("SelectChargingTime")
                 && document.getElementById("SelectChargingTime").style.display == "none")
@@ -295,14 +328,72 @@ function App() {
     if (useEffect_lock) return;
     useEffect_lock = true; console.log(useEffect_lock);
     console.log("useEffect");
-    // backend.get("/is_pack_available").catch(console.log).then(console.log).finally(console.log);
+    
+    
+    console.log(performance.navigation.type)
+    
+    
+    console.log(
+    `(
+      (${performance.navigation.type}==0                               // * (user replace new link or duplicate tab)
+      &&${sessionStorage.getItem("id")}                                // * and this_page id exists
+      )||${sessionStorage.getItem("finished")}!==void 0                 // * or this_page finished
+    )`,
+    `(
+      (${performance.navigation.type==0}                               // * (user replace new link or duplicate tab)
+      &&${sessionStorage.getItem("id")}                                // * and this_page id exists
+      )||${sessionStorage.getItem("finished")!==null}                 // * or this_page finished
+    )`,
+    `(
+      ${(performance.navigation.type==0                               // * (user replace new link or duplicate tab)
+      &&sessionStorage.getItem("id")                                // * and this_page id exists
+      )}||${sessionStorage.getItem("finished")!==null}                 // * or this_page finished
+    )`,
+    (
+      (performance.navigation.type==0                               // * (user replace new link or duplicate tab)
+      &&sessionStorage.getItem("id")                                // * and this_page id exists
+      )||sessionStorage.getItem("finished")!==null                 // * or this_page finished
+    )
+  );
+    
+    if(
+      (performance.navigation.type==0                               // * (user replace new link or duplicate tab)
+      &&sessionStorage.getItem("id")                                // * and this_page id exists
+      )||sessionStorage.getItem("finished")!==null                 // * or this_page finished
+    )sessionStorage.setItem("id",sessionStorage.getItem("id")-1)    // * then set this_page id to this_page id - 1
+    
+    //if     no this_page id         then set this_page id to Date.now()
+    if(!sessionStorage.getItem("id"))    sessionStorage.setItem("id",Date.now())
+    //if     no Latest_id      or              Latest_id < this_page id                then set cookie Latest_id to this_page id
+    if(!cookie.load("Latest_id")||cookie.load("Latest_id") < sessionStorage.getItem("id"))    cookie.save("Latest_id",sessionStorage.getItem("id"));
+    let check_Latest=(..._)=>{
+      return(check_Latest=((..._)=>{console.log("check_Latest", cookie.load("Latest_id"), sessionStorage.getItem("id"));
+        const out=cookie.load("Latest_id")!=sessionStorage.getItem("id")
+        if(out){
+            document.getElementById("link_not_believable_dialog").showModal();
+        }
+        return (..._)=>{console.log("check_Latest inner",!out);if(out)document.getElementById("link_not_believable_dialog").showModal();return !out};
+      })())()
+    }
+    window.addEventListener(isEventSupported("pagereveal")?"pagereveal":"load",check_Latest)
+    window.addEventListener(isEventSupported("focus")?"focus":"load",check_Latest)
+    
+    
+    
+    
     
     document.getElementById("pack_not_available_dialog")["programed_close"] = false;
+    // Check if the session finished is not defined
+    if(sessionStorage.getItem("finished")===null) 
     backend.get("/is_pack_available").then((response) => {
       if (!response.data)
         if (document.getElementById("pack_not_available_dialog"))
           document.getElementById("pack_not_available_dialog").showModal();
+      console.log("is_pack_available", response.data);
+      not_time_to_fetchData=!check_Latest()||!response.data;
+      console.log(`${not_time_to_fetchData}=${!check_Latest()}||${!response.data};`);
     });
+    else document.getElementById("link_not_believable_dialog").showModal();
     if (document.getElementById("pack_not_available_dialog"))
       document.getElementById("loading繼續").style.height = document.getElementById("after_cookie").style.height;
     console.log(document.getElementById("after_cookie").style);
@@ -439,6 +530,7 @@ function App() {
             FinishCharging.style.display = "";
             console.log("Finish");
             cookie.remove("_id");
+            sessionStorage.setItem("finished",true);
           }
           if (user_State != not_this_user) {
             console.log(not_this_user);
@@ -452,7 +544,7 @@ function App() {
           document.getElementById("_id").innerHTML = cookie.load("_id") || "no _id";
           document.getElementById("loading繼續").style.display = "none";
           document.getElementById("after_cookie").style.display = "";
-        });
+        }).catch((error) => {console.error("fetchData error:", error)});
     };
 
     fetchData();
@@ -532,6 +624,10 @@ function App() {
           );
       }
       console.log("interval");
+      if(sessionStorage.getItem("finished")!==null){
+        clearInterval(interval);
+        console.log("stop interval because sessionStorage finished");
+      }
     };
     interval = setInterval(countdown_loop, 1000);
     document.getElementById("confirmText").style.display = "none";
@@ -710,6 +806,7 @@ function App() {
         });
         console.log(cancal_response);
         cookie.remove('_id');
+        sessionStorage.setItem("finished",true);
         document.getElementById('message').textContent = translations[language].unplugMessage;
       }
       else {
@@ -753,6 +850,7 @@ function App() {
       });
       console.log(cancal_response);
       cookie.remove("_id");
+      sessionStorage.setItem("finished",true);
       document.getElementById('chargingStopped').style.display = '';
       document.getElementById('thankYouMsg').style.display = '';
       // New: Update dynamic text
@@ -919,6 +1017,14 @@ function App() {
             aria-label="Loading Spinner"
             data-testid="loader"
           />
+        </dialog>
+        <dialog id="link_not_believable_dialog" onClose={ondialogclose}>
+          <div style={{ position: 'absolute', top: '10px', right: '10px', display: showLanguageButton ? 'block' : 'none' }}>
+            <button onClick={toggleLanguage}>
+              {language === 'zh' ? 'Switch to English' : '切換到中文'}
+            </button>
+          </div>
+          <h1>{translations[language].please_rescan_the_QR_code}</h1>
         </dialog>
       </header>
     </div>
