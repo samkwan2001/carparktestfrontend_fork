@@ -136,6 +136,7 @@ function App() {
   const maxlim = 120;
   const time_step = 15;
   var display_time = 15;
+  let user_State_global=-1;
   const FirstTime = 0;
   const InQueue = 1;
   const InUse = 2;
@@ -202,6 +203,10 @@ function App() {
   function after_useEffect() {
     if (useEffect_lock) {
       function eventMT() {
+        if(user_State_global==Finish||user_State_global==not_this_user){
+          console.log("stop eventMT because user_State is",user_State_global==Finish?"Finish":user_State_global==not_this_user?"not_this_user":"other");
+          clearInterval(eventMTloop);
+        }
         if(sessionStorage.getItem("finished")!==null){
           console.log("stop eventMT because sessionStorage finished");
           clearInterval(eventMTloop);
@@ -415,6 +420,7 @@ function App() {
         .then(async (params) => {
           setcarNum(params[3]);
           const user_State = params[0];
+          user_State_global=user_State;
           console.log(user_State);
           console.log(params);
           const SelectChargingTime = document.getElementById("SelectChargingTime");
