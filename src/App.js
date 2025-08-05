@@ -1,6 +1,8 @@
 import logo from './ive_icon.png';
 import './App.css';
 import { useEffect, useState, CSSProperties } from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import cookie from 'react-cookies';
 import { ClipLoader } from "react-spinners";
 import axios from 'axios';
@@ -45,6 +47,7 @@ const translations = {
     notYourSpot: "此車位已經有其他使用者使用!",
     dialog_pack_not_available: "充電系統暫時不可用",
     please_rescan_the_QR_code: "請重新掃描二維碼",
+    I_have_Verification_Code: "我有驗證碼",
   },
   en: {
     welcome: "Welcome",
@@ -78,13 +81,14 @@ const translations = {
     notYourSpot: "This parking space is already in use by another user!",
     dialog_pack_not_available: "Charging system temporarily unavailable",
     please_rescan_the_QR_code: "Please rescan the QR code",
+    I_have_Verification_Code: "I have Verification Code",
   },
 };
-var isEventSupported = (function(){
+var isEventSupported = (function () {
   var TAGNAMES = {
-    'select':'input','change':'input',
-    'submit':'form','reset':'form',
-    'error':'img','load':'img','abort':'img'
+    'select': 'input', 'change': 'input',
+    'submit': 'form', 'reset': 'form',
+    'error': 'img', 'load': 'img', 'abort': 'img'
   }
   function isEventSupported(eventName) {
     var el = document.createElement(TAGNAMES[eventName] || 'div');
@@ -136,7 +140,7 @@ function App() {
   const maxlim = 120;
   const time_step = 15;
   var display_time = 15;
-  let user_State_global=-1;
+  let user_State_global = -1;
   const FirstTime = 0;
   const InQueue = 1;
   const InUse = 2;
@@ -146,8 +150,9 @@ function App() {
 
   let interval;
   let not_time_to_fetchData = true; // Flag to control data fetching timing
-  // const API_BASE_URL = 'https://carparkvercelbackend.vercel.app';
+  // // const API_BASE_URL = 'https://carparkvercelbackend.vercel.app';
   const API_BASE_URL = 'https://express-flame-two.vercel.app';
+  // const API_BASE_URL = 'http://localhost:7000';
   const backend = axios.create({
     baseURL: API_BASE_URL,
     timeout: 5000,
@@ -160,7 +165,7 @@ function App() {
     while (1) {
       try {
         console.log("try time get data from backend");
-        if(not_time_to_fetchData)throw new Error("not time to fetchData");
+        if (not_time_to_fetchData) throw new Error("not time to fetchData");
         let output = [];
         const carNum_response = await backend.get("/", {
           params: {
@@ -173,7 +178,7 @@ function App() {
         return carNum_response.data;
       } catch (error) {
         console.error('Error fetching data: ', error);
-        if(sessionStorage.getItem("finished")!==null){
+        if (sessionStorage.getItem("finished") !== null) {
           console.log("stop getMongo_userState because sessionStorage finished");
           throw new Error("Promise rejected: sessionStorage finished");
         }
@@ -199,15 +204,14 @@ function App() {
   let eventMTloop = void 0;
   let dont_reload = false;
   let last_useEffect = 0;
-
   function after_useEffect() {
     if (useEffect_lock) {
       function eventMT() {
-        if(user_State_global==Finish||user_State_global==not_this_user){
-          console.log("stop eventMT because user_State is",user_State_global==Finish?"Finish":user_State_global==not_this_user?"not_this_user":"other");
+        if (user_State_global == Finish || user_State_global == not_this_user) {
+          console.log("stop eventMT because user_State is", user_State_global == Finish ? "Finish" : user_State_global == not_this_user ? "not_this_user" : "other");
           clearInterval(eventMTloop);
         }
-        if(sessionStorage.getItem("finished")!==null){
+        if (sessionStorage.getItem("finished") !== null) {
           console.log("stop eventMT because sessionStorage finished");
           clearInterval(eventMTloop);
         }
@@ -226,10 +230,10 @@ function App() {
             console.log("exception:", data.exception)
             if (event.data == "pack_is_available") {
               if (document.getElementById("pack_not_available_dialog")) close_dialog(document.getElementById("pack_not_available_dialog"));
-              not_time_to_fetchData = false;console.log("pack_is_available", not_time_to_fetchData);
+              not_time_to_fetchData = false; console.log("pack_is_available", not_time_to_fetchData);
             } else if (event.data == "pack_not_available") {
               if (document.getElementById("pack_not_available_dialog")) document.getElementById("pack_not_available_dialog").showModal();
-              not_time_to_fetchData = true;console.log("pack_not_available", not_time_to_fetchData);
+              not_time_to_fetchData = true; console.log("pack_not_available", not_time_to_fetchData);
             } else if ((
               (document.getElementById("SelectChargingTime")
                 && document.getElementById("SelectChargingTime").style.display == "none")
@@ -278,10 +282,10 @@ function App() {
             start_eventSource();
             console.log(`start_eventSource finfsh`);
           };
-          
+
           eventSource.addEventListener('reconnect', (event) => {
             eventSource.close();
-            console.log("reconnect",new Date(), ":", event.type);
+            console.log("reconnect", new Date(), ":", event.type);
             start_eventSource();
           });
         }
@@ -333,71 +337,72 @@ function App() {
     if (useEffect_lock) return;
     useEffect_lock = true; console.log(useEffect_lock);
     console.log("useEffect");
-    
-    
+
+
     console.log(performance.navigation.type)
-    
-    
+
+
     console.log(
-    `(
+      `(
       (${performance.navigation.type}==0                               // * (user replace new link or duplicate tab)
       &&${sessionStorage.getItem("id")}                                // * and this_page id exists
       )||${sessionStorage.getItem("finished")}!==void 0                 // * or this_page finished
     )`,
-    `(
-      (${performance.navigation.type==0}                               // * (user replace new link or duplicate tab)
+      `(
+      (${performance.navigation.type == 0}                               // * (user replace new link or duplicate tab)
       &&${sessionStorage.getItem("id")}                                // * and this_page id exists
-      )||${sessionStorage.getItem("finished")!==null}                 // * or this_page finished
+      )||${sessionStorage.getItem("finished") !== null}                 // * or this_page finished
     )`,
-    `(
-      ${(performance.navigation.type==0                               // * (user replace new link or duplicate tab)
-      &&sessionStorage.getItem("id")                                // * and this_page id exists
-      )}||${sessionStorage.getItem("finished")!==null}                 // * or this_page finished
+      `(
+      ${(performance.navigation.type == 0                               // * (user replace new link or duplicate tab)
+        && sessionStorage.getItem("id")                                // * and this_page id exists
+      )}||${sessionStorage.getItem("finished") !== null}                 // * or this_page finished
     )`,
-    (
-      (performance.navigation.type==0                               // * (user replace new link or duplicate tab)
-      &&sessionStorage.getItem("id")                                // * and this_page id exists
-      )||sessionStorage.getItem("finished")!==null                 // * or this_page finished
-    )
-  );
-    
-    if(
-      (performance.navigation.type==0                               // * (user replace new link or duplicate tab)
-      &&sessionStorage.getItem("id")                                // * and this_page id exists
-      )||sessionStorage.getItem("finished")!==null                 // * or this_page finished
-    )sessionStorage.setItem("id",sessionStorage.getItem("id")-1)    // * then set this_page id to this_page id - 1
-    
+      (
+        (performance.navigation.type == 0                               // * (user replace new link or duplicate tab)
+          && sessionStorage.getItem("id")                                // * and this_page id exists
+        ) || sessionStorage.getItem("finished") !== null                 // * or this_page finished
+      )
+    );
+
+    if (
+      (performance.navigation.type == 0                               // * (user replace new link or duplicate tab)
+        && sessionStorage.getItem("id")                                // * and this_page id exists
+      ) || sessionStorage.getItem("finished") !== null                 // * or this_page finished
+    ) sessionStorage.setItem("id", sessionStorage.getItem("id") - 1)    // * then set this_page id to this_page id - 1
+
     //if     no this_page id         then set this_page id to Date.now()
-    if(!sessionStorage.getItem("id"))    sessionStorage.setItem("id",Date.now())
+    if (!sessionStorage.getItem("id")) sessionStorage.setItem("id", Date.now())
     //if     no Latest_id      or              Latest_id < this_page id                then set cookie Latest_id to this_page id
-    if(!cookie.load("Latest_id")||cookie.load("Latest_id") < sessionStorage.getItem("id"))    cookie.save("Latest_id",sessionStorage.getItem("id"));
-    let check_Latest=(..._)=>{
-      return(check_Latest=((..._)=>{console.log("check_Latest", cookie.load("Latest_id"), sessionStorage.getItem("id"));
-        const out=cookie.load("Latest_id")!=sessionStorage.getItem("id")
-        if(out){
-            document.getElementById("link_not_believable_dialog").showModal();
+    if (!cookie.load("Latest_id") || cookie.load("Latest_id") < sessionStorage.getItem("id")) cookie.save("Latest_id", sessionStorage.getItem("id"));
+    let check_Latest = (..._) => {
+      return (check_Latest = ((..._) => {
+        console.log("check_Latest", cookie.load("Latest_id"), sessionStorage.getItem("id"));
+        const out = cookie.load("Latest_id") != sessionStorage.getItem("id")
+        if (out) {
+          document.getElementById("link_not_believable_dialog").showModal();
         }
-        return (..._)=>{console.log("check_Latest inner",!out);if(out)document.getElementById("link_not_believable_dialog").showModal();return !out};
+        return (..._) => { console.log("check_Latest inner", !out); if (out) document.getElementById("link_not_believable_dialog").showModal(); return !out };
       })())()
     }
-    window.addEventListener(isEventSupported("pagereveal")?"pagereveal":"load",check_Latest)
-    window.addEventListener(isEventSupported("focus")?"focus":"load",check_Latest)
-    
-    
-    
-    
-    
+    window.addEventListener(isEventSupported("pagereveal") ? "pagereveal" : "load", check_Latest)
+    window.addEventListener(isEventSupported("focus") ? "focus" : "load", check_Latest)
+
+
+
+
+
     document.getElementById("pack_not_available_dialog")["programed_close"] = false;
     // Check if the session finished is not defined
-    if(sessionStorage.getItem("finished")===null) 
-    backend.get("/is_pack_available").then((response) => {
-      if (!response.data)
-        if (document.getElementById("pack_not_available_dialog"))
-          document.getElementById("pack_not_available_dialog").showModal();
-      console.log("is_pack_available", response.data);
-      not_time_to_fetchData=!check_Latest()||!response.data;
-      console.log(`${not_time_to_fetchData}=${!check_Latest()}||${!response.data};`);
-    });
+    if (sessionStorage.getItem("finished") === null)
+      backend.get("/is_pack_available").then((response) => {
+        if (!response.data)
+          if (document.getElementById("pack_not_available_dialog"))
+            document.getElementById("pack_not_available_dialog").showModal();
+        console.log("is_pack_available", response.data);
+        not_time_to_fetchData = !check_Latest() || !response.data;
+        console.log(`${not_time_to_fetchData}=${!check_Latest()}||${!response.data};`);
+      });
     else document.getElementById("link_not_believable_dialog").showModal();
     if (document.getElementById("pack_not_available_dialog"))
       document.getElementById("loading繼續").style.height = document.getElementById("after_cookie").style.height;
@@ -420,7 +425,7 @@ function App() {
         .then(async (params) => {
           setcarNum(params[3]);
           const user_State = params[0];
-          user_State_global=user_State;
+          user_State_global = user_State;
           console.log(user_State);
           console.log(params);
           const SelectChargingTime = document.getElementById("SelectChargingTime");
@@ -536,7 +541,7 @@ function App() {
             FinishCharging.style.display = "";
             console.log("Finish");
             cookie.remove("_id");
-            sessionStorage.setItem("finished",true);
+            sessionStorage.setItem("finished", true);
           }
           if (user_State != not_this_user) {
             console.log(not_this_user);
@@ -550,11 +555,11 @@ function App() {
           document.getElementById("_id").innerHTML = cookie.load("_id") || "no _id";
           document.getElementById("loading繼續").style.display = "none";
           document.getElementById("after_cookie").style.display = "";
-        }).catch((error) => {console.error("fetchData error:", error)});
+        }).catch((error) => { console.error("fetchData error:", error) });
     };
 
     fetchData();
-
+    document.addEventListener("fetchData", fetchData);
     //let countdown_loop = () => { console.warn("empty countdown_loop"); };
     interval = setInterval(countdown_loop, 0);
     clearInterval(interval);
@@ -630,7 +635,7 @@ function App() {
           );
       }
       console.log("interval");
-      if(sessionStorage.getItem("finished")!==null){
+      if (sessionStorage.getItem("finished") !== null) {
         clearInterval(interval);
         console.log("stop interval because sessionStorage finished");
       }
@@ -812,7 +817,7 @@ function App() {
         });
         console.log(cancal_response);
         cookie.remove('_id');
-        sessionStorage.setItem("finished",true);
+        sessionStorage.setItem("finished", true);
         document.getElementById('message').textContent = translations[language].unplugMessage;
       }
       else {
@@ -856,7 +861,7 @@ function App() {
       });
       console.log(cancal_response);
       cookie.remove("_id");
-      sessionStorage.setItem("finished",true);
+      sessionStorage.setItem("finished", true);
       document.getElementById('chargingStopped').style.display = '';
       document.getElementById('thankYouMsg').style.display = '';
       // New: Update dynamic text
@@ -874,6 +879,57 @@ function App() {
     };
   }
 
+  const [showPassword, setShowPassword] = useState(false);
+  const I_have_Verification_Code_click = () => {
+    const Verification_Code_form = document.getElementById("Verification_Code_form");
+    Verification_Code_form.style.display = "";
+
+  }
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+  async function sendVerificatioCode() {
+    const Verification = document.getElementById("Verification");
+    console.log(Verification.validity)
+    if (Verification.validity.valid) {
+      const Verification_Code_form = document.getElementById("Verification_Code_form");
+      Verification_Code_form.style.display = "none";
+      const response = await backend.post("/Verification", null,
+        {
+          params: {
+            'Verification code': Verification.value,
+          }
+        }
+      );
+      console.log(response);
+      if (response.data.length == 24) {
+        const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 3);
+        console.log(expires);
+        console.log(window.location.host);
+        cookie.save(
+          '_id',
+          response.data,
+          {
+            path: '/',
+            expires,
+          });
+        console.log(cookie.load("_id"));
+        const fetchDataEvent = new Event('fetchData', {
+          bubbles: true, // Allow the event to bubble up the DOM tree
+          cancelable: true // Allow the event to be canceled
+        });
+        document.dispatchEvent(fetchDataEvent);
+      } else {
+        Verification_Code_form.style.display = "";
+        Verification.style.background = "#f00";
+        setTimeout(() => Verification.style.background = "", 100)
+      }
+    } else {
+      Verification.style.background = "#f00";
+      setTimeout(() => Verification.style.background = "", 100)
+    }
+    // backend.get("/Verification").
+  }
   return (
     <div className="App">
       <header className="App-header">
@@ -1006,6 +1062,18 @@ function App() {
         <div-top id="NotYou" style={{ display: "none" }}>
           <h1>{translations[language].cheapestIndoorParking}</h1>
           <div class="info">{translations[language].parkingSpace.replace('{carNum}', carNum)}</div>
+          <button id="I_have_Verification_Code" onClick={I_have_Verification_Code_click}>{translations[language].I_have_Verification_Code}</button>
+          <div id="Verification_Code_form" style={{ display: "none" }}>
+            <div >
+              <input id="Verification" maxlength="200" type={showPassword ? 'text' : 'password'} name="code" required="required" class="form-control input-lg" pattern="^(?=.*[a-fA-F])(?=.*[0-9])[a-fA-F0-9]{10}$|^[a-fA-F]{10}$|^[0-9]{10}$" title="Wrong Code" placeholder="Verification Code" />
+              <FontAwesomeIcon
+                icon={showPassword ? faEyeSlash : faEye}
+                onClick={togglePasswordVisibility}
+                style={{ cursor: 'pointer' }}
+              />
+            </div>
+            <input type="submit" name="submit" onClick={sendVerificatioCode} />
+          </div>
           <p>{translations[language].notYourSpot}</p>
         </div-top>
         <dialog id="pack_not_available_dialog" onClose={ondialogclose}>
