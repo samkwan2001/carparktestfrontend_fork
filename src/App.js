@@ -233,9 +233,9 @@ function App() {
             console.log('接收到事件:', event.type);
             console.log('接收到事件數據:', data);
             console.log("exception:", data.exception)
-            if (event.data == "pack_is_available") {
+            if (event.data == "park_is_available") {
               if (document.getElementById("pack_not_available_dialog")) close_dialog(document.getElementById("pack_not_available_dialog"));
-              not_time_to_fetchData = false; console.log("pack_is_available", not_time_to_fetchData);
+              not_time_to_fetchData = false; console.log("park_is_available", not_time_to_fetchData);
             } else if (event.data == "pack_not_available") {
               if (document.getElementById("pack_not_available_dialog")) document.getElementById("pack_not_available_dialog").showModal();
               not_time_to_fetchData = true; console.log("pack_not_available", not_time_to_fetchData);
