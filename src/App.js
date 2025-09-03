@@ -204,6 +204,11 @@ function App() {
   let eventMTloop = void 0;
   let dont_reload = false;
   let last_useEffect = 0;
+  
+  function close_dialog(dialog) {
+    document.getElementById("pack_not_available_dialog")["programed_close"] = true;
+    dialog.close()
+  }
   function after_useEffect() {
     if (useEffect_lock) {
       function eventMT() {
@@ -322,10 +327,6 @@ function App() {
   }
 
   let fetchData = void 0;
-  function close_dialog(dialog) {
-    document.getElementById("pack_not_available_dialog")["programed_close"] = true;
-    dialog.close()
-  }
   function ondialogclose(e) {
     if (!document.getElementById("pack_not_available_dialog")["programed_close"]) e.target.showModal()
     else document.getElementById("pack_not_available_dialog")["programed_close"] = false;
