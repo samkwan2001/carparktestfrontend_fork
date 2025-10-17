@@ -939,7 +939,7 @@ function App() {
             {language === 'zh' ? 'Switch to English' : '切換到中文'}
           </button>
         </div>
-        <p id="_id" style={{ display: "none" }}>loading</p>
+        <p id="_id" style={{ display: "" }}>loading</p>
         <div-top id="react_def_app" style={{ display: "none" }}>
           <img src={logo} className="App-logo" alt="logo" />
           <p>
