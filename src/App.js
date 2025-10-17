@@ -121,7 +121,7 @@ function App() {
         if (result.length === 1) {
           document.getElementById("qrresult").innerHTML = result[0].rawValue;
           sessionStorage.setItem("qr",true);
-          sessionStorage.setItem("finished",null);
+          sessionStorage.setItem("finished",void 0);
           console.log("qr", window.location.href = (result[0].rawValue));
         } else {
           for (let i = 0; i < result.length; i++) {
@@ -129,7 +129,7 @@ function App() {
             const btn = document.createElement("button");
             btn.innerText = atob((new URL(result[i].rawValue)).pathname.replace("/", ""));
             sessionStorage.setItem("qr",true);
-              sessionStorage.setItem("finished",null);
+              sessionStorage.setItem("finished",void 0);
             btn.onclick = () => { window.location.href = (result[i].rawValue); }
             document.getElementById("qrresult").appendChild(btn);
           }
