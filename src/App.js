@@ -107,6 +107,7 @@ var isEventSupported = (function () {
 
 function App() {
 
+
   const [Qrscanner_paused, setQrscanner_paused] = useState(true);
   const Qrscanner = <Scanner
     paused={Qrscanner_paused}
@@ -189,6 +190,13 @@ function App() {
     baseURL: API_BASE_URL,
     timeout: 5000,
   });
+
+  let [errorlog, seterrorlog] = useState("");
+  const Errorlog = <textarea readOnly>errorlog</textarea>
+  window.onerror = (e) => {
+    // backend.post("/client_error",e.message);
+    seterrorlog(errorlog + "\n" + new Error(e).message);
+  }
   function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -1136,6 +1144,7 @@ function App() {
           {Qrscanner}
         </dialog>
       </header>
+      {Errorlog}
     </div>
   );
 }
