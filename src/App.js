@@ -411,13 +411,13 @@ function App() {
     );
 
     if (
-      ((performance.navigation.type == 0 && !sessionStorage.getItem("qr"))                               // * (user replace new link or duplicate tab)
+      ((performance.navigation.type == 0 && !sessionStorage.getItem("qr"))// * (user replace new link or duplicate tab)
         && sessionStorage.getItem("id")                                // * and this_page id exists
       ) || sessionStorage.getItem("finished") !== null                 // * or this_page finished
     ) sessionStorage.setItem("id", sessionStorage.getItem("id") - 1)    // * then set this_page id to this_page id - 1
     sessionStorage.setItem("qr",false);
-    //if     no this_page id         then set this_page id to Date.now()
-    if (!sessionStorage.getItem("id")) sessionStorage.setItem("id", Date.now())
+    //if          no this_page id    or replace link by scanning QRcode   then set this_page id to Date.now()
+    if (!sessionStorage.getItem("id")||sessionStorage.getItem("qr")) sessionStorage.setItem("id", Date.now())
     //if     no Latest_id      or              Latest_id < this_page id                then set cookie Latest_id to this_page id
     if (!cookie.load("Latest_id") || cookie.load("Latest_id") < sessionStorage.getItem("id")) cookie.save("Latest_id", sessionStorage.getItem("id"));
     let check_Latest = (..._) => {
