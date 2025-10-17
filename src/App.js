@@ -120,14 +120,16 @@ function App() {
         console.log("qr", Qrscanner.paused);
         if (result.length === 1) {
           document.getElementById("qrresult").innerHTML = result[0].rawValue;
-          sessionStorage.setItem("qr",true)
+          sessionStorage.setItem("qr",true);
+          sessionStorage.setItem("finished",false);
           console.log("qr", window.location.href = (result[0].rawValue));
         } else {
           for (let i = 0; i < result.length; i++) {
             console.log("qr", (new URL(result[i].rawValue)));
             const btn = document.createElement("button");
             btn.innerText = atob((new URL(result[i].rawValue)).pathname.replace("/", ""));
-            sessionStorage.setItem("qr",true)
+            sessionStorage.setItem("qr",true);
+              sessionStorage.setItem("finished",false);
             btn.onclick = () => { window.location.href = (result[i].rawValue); }
             document.getElementById("qrresult").appendChild(btn);
           }
@@ -387,22 +389,22 @@ function App() {
 
     console.log(
       `(
-      (${performance.navigation.type}==0                               // * (user replace new link or duplicate tab)
+      (${performance.navigation.type}==0 && !${sessionStorage.getItem("qr")}// * (user replace new link or duplicate tab)
       &&${sessionStorage.getItem("id")}                                // * and this_page id exists
       )||${sessionStorage.getItem("finished")}!==void 0                 // * or this_page finished
     )`,
       `(
-      (${performance.navigation.type == 0}                               // * (user replace new link or duplicate tab)
+      (${performance.navigation.type == 0}&& ${!sessionStorage.getItem("qr")} // * (user replace new link or duplicate tab)
       &&${sessionStorage.getItem("id")}                                // * and this_page id exists
       )||${sessionStorage.getItem("finished") !== null}                 // * or this_page finished
     )`,
       `(
-      ${(performance.navigation.type == 0                               // * (user replace new link or duplicate tab)
+      ${(performance.navigation.type == 0 && !sessionStorage.getItem("qr")// * (user replace new link or duplicate tab)
         && sessionStorage.getItem("id")                                // * and this_page id exists
       )}||${sessionStorage.getItem("finished") !== null}                 // * or this_page finished
     )`,
       (
-        (performance.navigation.type == 0                               // * (user replace new link or duplicate tab)
+        (performance.navigation.type == 0 && !sessionStorage.getItem("qr")// * (user replace new link or duplicate tab)
           && sessionStorage.getItem("id")                                // * and this_page id exists
         ) || sessionStorage.getItem("finished") !== null                 // * or this_page finished
       )
