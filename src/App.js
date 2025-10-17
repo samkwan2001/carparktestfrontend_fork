@@ -191,8 +191,8 @@ function App() {
     timeout: 5000,
   });
 
-  let [errorlog, seterrorlog] = useState("");
-  const Errorlog = <textarea readOnly>errorlog</textarea>
+  const [errorlog, seterrorlog] = useState("");
+  const Errorlog = <textarea readOnly>{errorlog}</textarea>
   window.onerror = (e) => {
     // backend.post("/client_error",e.message);
     seterrorlog(errorlog + "\n" + new Error(e).message);
