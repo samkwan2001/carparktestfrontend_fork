@@ -120,12 +120,14 @@ function App() {
         console.log("qr", Qrscanner.paused);
         if (result.length === 1) {
           document.getElementById("qrresult").innerHTML = result[0].rawValue;
+          sessionStorage.setItem("qr",true)
           console.log("qr", window.location.href = (result[0].rawValue));
         } else {
           for (let i = 0; i < result.length; i++) {
             console.log("qr", (new URL(result[i].rawValue)));
             const btn = document.createElement("button");
             btn.innerText = atob((new URL(result[i].rawValue)).pathname.replace("/", ""));
+            sessionStorage.setItem("qr",true)
             btn.onclick = () => { window.location.href = (result[i].rawValue); }
             document.getElementById("qrresult").appendChild(btn);
           }
@@ -407,11 +409,11 @@ function App() {
     );
 
     if (
-      (performance.navigation.type == 0                               // * (user replace new link or duplicate tab)
+      ((performance.navigation.type == 0 && !sessionStorage.getItem("qr"))                               // * (user replace new link or duplicate tab)
         && sessionStorage.getItem("id")                                // * and this_page id exists
       ) || sessionStorage.getItem("finished") !== null                 // * or this_page finished
     ) sessionStorage.setItem("id", sessionStorage.getItem("id") - 1)    // * then set this_page id to this_page id - 1
-
+    sessionStorage.setItem("qr",false);
     //if     no this_page id         then set this_page id to Date.now()
     if (!sessionStorage.getItem("id")) sessionStorage.setItem("id", Date.now())
     //if     no Latest_id      or              Latest_id < this_page id                then set cookie Latest_id to this_page id
