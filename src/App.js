@@ -935,9 +935,9 @@ function App() {
     <div className="App">
       <header className="App-header">
         <div style={{ position: 'absolute', top: '10px', right: '10px', display: showLanguageButton ? 'block' : 'none' }}>
-          <button onClick={toggleLanguage}>
+          {/* <button onClick={toggleLanguage}>
             {language === 'zh' ? 'Switch to English' : '切換到中文'}
-          </button>
+          </button> */}
         </div>
         <p id="_id" style={{ display: "" }}>loading</p>
         <div-top id="react_def_app" style={{ display: "none" }}>
@@ -1079,9 +1079,9 @@ function App() {
         </div-top>
         <dialog id="pack_not_available_dialog" onClose={ondialogclose}>
           <div style={{ position: 'absolute', top: '10px', right: '10px', display: showLanguageButton ? 'block' : 'none' }}>
-            <button onClick={toggleLanguage}>
+            {/* <button onClick={toggleLanguage}>
               {language === 'zh' ? 'Switch to English' : '切換到中文'}
-            </button>
+            </button> */}
           </div>
           <h1>{translations[language].dialog_pack_not_available}</h1>
           <ClipLoader
@@ -1093,11 +1093,11 @@ function App() {
             data-testid="loader"
           />
         </dialog>
-        <dialog id="link_not_believable_dialog" onClose={ondialogclose}>
+        <dialog id="link_not_believable_dialog" onClose={ondialogclose} style={{width: "100vw",height: "100vh"}}>
           <div style={{ position: 'absolute', top: '10px', right: '10px', display: showLanguageButton ? 'block' : 'none' }}>
-            <button onClick={toggleLanguage}>
+            {/* <button onClick={toggleLanguage}>
               {language === 'zh' ? 'Switch to English' : '切換到中文'}
-            </button>
+            </button> */}
           </div>
           <h1>{translations[language].please_rescan_the_QR_code}</h1>
         </dialog>
