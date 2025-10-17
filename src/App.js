@@ -2,10 +2,11 @@ import logo from './ive_icon.png';
 import './App.css';
 import { useEffect, useState, CSSProperties } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faEyeSlash, faL, fas } from '@fortawesome/free-solid-svg-icons';
 import cookie from 'react-cookies';
 import { ClipLoader } from "react-spinners";
 import axios from 'axios';
+import { Scanner } from '@yudiel/react-qr-scanner';
 
 const override/*: CSSProperties*/ = {
   display: "block",
@@ -105,6 +106,37 @@ var isEventSupported = (function () {
 })();
 
 function App() {
+
+  const [Qrscanner_paused, setQrscanner_paused] = useState(true);
+  const Qrscanner = <Scanner
+    paused={Qrscanner_paused}
+    onScan={
+      (result) => {
+        console.log("qr", result);
+        console.log("qr", Qrscanner);
+        console.log("qr", Qrscanner.paused);
+        setQrscanner_paused(true);
+        console.log("qr", Qrscanner.paused);
+        if (result.length === 1) {
+          document.getElementById("qrresult").innerHTML = result[0].rawValue;
+          console.log("qr", window.location.href = (result[0].rawValue));
+        } else {
+          for (let i = 0; i < result.length; i++) {
+            console.log("qr", (new URL(result[i].rawValue)));
+            const btn = document.createElement("button");
+            btn.innerText = atob((new URL(result[i].rawValue)).pathname.replace("/", ""));
+            btn.onclick = () => { window.location.href = (result[i].rawValue); }
+            document.getElementById("qrresult").appendChild(btn);
+          }
+        }
+      }
+    }
+    onError={
+      (error) => {
+        console.error("qr", error);
+      }
+    }
+  />;
   // State for current language
   const [language, setLanguage] = useState('zh'); // Default to Chinese
   // New: State to store dynamic values for re-rendering
@@ -151,7 +183,7 @@ function App() {
   let interval;
   let not_time_to_fetchData = true; // Flag to control data fetching timing
   // // const API_BASE_URL = 'https://carparkvercelbackend.vercel.app';
-  const API_BASE_URL = window.location.hostname.match(/-wall-c/)?'https://carparkvercelbackend-wall-c.vercel.app':'https://express-flame-two.vercel.app';
+  const API_BASE_URL = window.location.hostname.match(/-wall-c/) ? 'https://carparkvercelbackend-wall-c.vercel.app' : 'https://express-flame-two.vercel.app';
   // const API_BASE_URL = 'http://localhost:7000';
   const backend = axios.create({
     baseURL: API_BASE_URL,
@@ -204,7 +236,7 @@ function App() {
   let eventMTloop = void 0;
   let dont_reload = false;
   let last_useEffect = 0;
-  
+
   function close_dialog(dialog) {
     document.getElementById("pack_not_available_dialog")["programed_close"] = true;
     dialog.close()
@@ -381,9 +413,9 @@ function App() {
         console.log("check_Latest", cookie.load("Latest_id"), sessionStorage.getItem("id"));
         const out = cookie.load("Latest_id") != sessionStorage.getItem("id")
         if (out) {
-          document.getElementById("link_not_believable_dialog").showModal();
+          document.getElementById("link_not_believable_dialog").showModal(); setQrscanner_paused(false);
         }
-        return (..._) => { console.log("check_Latest inner", !out); if (out) document.getElementById("link_not_believable_dialog").showModal(); return !out };
+        return (..._) => { console.log("check_Latest inner", !out); if (out) { document.getElementById("link_not_believable_dialog").showModal(); setQrscanner_paused(false); } return !out };
       })())()
     }
     window.addEventListener(isEventSupported("pagereveal") ? "pagereveal" : "load", check_Latest)
@@ -404,7 +436,7 @@ function App() {
         not_time_to_fetchData = !check_Latest() || !response.data;
         console.log(`${not_time_to_fetchData}=${!check_Latest()}||${!response.data};`);
       });
-    else document.getElementById("link_not_believable_dialog").showModal();
+    else { document.getElementById("link_not_believable_dialog").showModal(); setQrscanner_paused(false); }
     if (document.getElementById("pack_not_available_dialog"))
       document.getElementById("loading繼續").style.height = document.getElementById("after_cookie").style.height;
     console.log(document.getElementById("after_cookie").style);
@@ -1093,13 +1125,15 @@ function App() {
             data-testid="loader"
           />
         </dialog>
-        <dialog id="link_not_believable_dialog" onClose={ondialogclose} style={{width: "100vw",height: "100vh"}}>
+        <dialog id="link_not_believable_dialog" onClose={ondialogclose} style={{ width: "100vw", height: "100vh" }}>
           <div style={{ position: 'absolute', top: '10px', right: '10px', display: showLanguageButton ? 'block' : 'none' }}>
             {/* <button onClick={toggleLanguage}>
               {language === 'zh' ? 'Switch to English' : '切換到中文'}
             </button> */}
           </div>
           <h1>{translations[language].please_rescan_the_QR_code}</h1>
+          <div id="qrresult"></div>
+          {Qrscanner}
         </dialog>
       </header>
     </div>
