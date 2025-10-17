@@ -121,7 +121,7 @@ function App() {
         if (result.length === 1) {
           document.getElementById("qrresult").innerHTML = result[0].rawValue;
           sessionStorage.setItem("qr",true);
-          sessionStorage.setItem("finished",void 0);
+          sessionStorage.setItem("finished",null);
           console.log("qr", window.location.href = (result[0].rawValue));
         } else {
           for (let i = 0; i < result.length; i++) {
@@ -129,7 +129,7 @@ function App() {
             const btn = document.createElement("button");
             btn.innerText = atob((new URL(result[i].rawValue)).pathname.replace("/", ""));
             sessionStorage.setItem("qr",true);
-              sessionStorage.setItem("finished",void 0);
+              sessionStorage.setItem("finished",null);
             btn.onclick = () => { window.location.href = (result[i].rawValue); }
             document.getElementById("qrresult").appendChild(btn);
           }
@@ -392,17 +392,17 @@ function App() {
       (${performance.navigation.type}==0 && !${sessionStorage.getItem("qr")}// * (user replace new link or duplicate tab)
       &&${sessionStorage.getItem("id")}                                // * and this_page id exists
       )||${sessionStorage.getItem("finished")}!==void 0                 // * or this_page finished
-    )`,
+    )\n`,
       `(
       (${performance.navigation.type == 0}&& ${!sessionStorage.getItem("qr")} // * (user replace new link or duplicate tab)
       &&${sessionStorage.getItem("id")}                                // * and this_page id exists
       )||${sessionStorage.getItem("finished") !== null}                 // * or this_page finished
-    )`,
+    )\n`,
       `(
       ${(performance.navigation.type == 0 && !sessionStorage.getItem("qr")// * (user replace new link or duplicate tab)
         && sessionStorage.getItem("id")                                // * and this_page id exists
       )}||${sessionStorage.getItem("finished") !== null}                 // * or this_page finished
-    )`,
+    )\n`,
       (
         (performance.navigation.type == 0 && !sessionStorage.getItem("qr")// * (user replace new link or duplicate tab)
           && sessionStorage.getItem("id")                                // * and this_page id exists
