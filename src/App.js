@@ -209,6 +209,7 @@ function App() {
     while (1) {
       try {
         console.log("try time get data from backend");
+        not_time_to_fetchData = !((await backend.get("/is_pack_available")).data)
         if (not_time_to_fetchData) throw new Error("not time to fetchData");
         let output = [];
         const carNum_response = await backend.get("/", {
@@ -226,7 +227,7 @@ function App() {
           console.log("stop getMongo_userState because sessionStorage finished");
           throw new Error("Promise rejected: sessionStorage finished");
         }
-        await sleep(1000);
+        await sleep(3000);
         // throw error;
       }
     }
