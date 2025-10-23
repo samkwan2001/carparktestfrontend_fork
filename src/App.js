@@ -220,7 +220,7 @@ function App() {
         });
         console.log(carNum_response);
         console.log(carNum_response.data);
-        return carNum_response.data;
+        return carNum_response.data.answer;
       } catch (error) {
         console.error('Error fetching data: ', error);
         if (sessionStorage.getItem("finished") !== null) {
