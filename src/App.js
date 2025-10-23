@@ -209,7 +209,7 @@ function App() {
     while (1) {
       try {
         console.log("try time get data from backend");
-        not_time_to_fetchData = !((await backend.get("/is_pack_available")).data)
+        not_time_to_fetchData = !((await backend.get("/is_pack_available")).data.answer)
         if (not_time_to_fetchData) throw new Error("not time to fetchData");
         let output = [];
         const carNum_response = await backend.get("/", {
@@ -220,7 +220,7 @@ function App() {
         });
         console.log(carNum_response);
         console.log(carNum_response.data);
-        return carNum_response.data.answer;
+        return carNum_response.data;
       } catch (error) {
         console.error('Error fetching data: ', error);
         if (sessionStorage.getItem("finished") !== null) {
