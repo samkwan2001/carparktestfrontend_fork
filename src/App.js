@@ -213,6 +213,7 @@ function App() {
         not_time_to_fetchData = !((await backend.get("/is_pack_available")).data.answer)
         if (not_time_to_fetchData) throw new Error("not time to fetchData");
         let output = [];
+        if(sessionStorage.getItem("finished") !== null)throw new Error("session finished");
         const carNum_response = await backend.get("/", {
           params: {
             'Parking Space Num': _carNum,
