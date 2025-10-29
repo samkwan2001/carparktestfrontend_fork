@@ -338,6 +338,11 @@ function App() {
             console.log("reconnect", new Date(), ":", event.type);
             start_eventSource();
           });
+          eventSource.addEventListener("need_wait",(event)=>{
+            console.log("need_wait", event.data,typeof event.data);
+            if(!isNaN(parseInt(event.data)))
+              document.getElementById("There are x minutes left to start charging").innerHTML=millis_to_time_String(Date.now()+parseInt(event.data));
+          });
         }
         start_eventSource();
       }
@@ -1149,7 +1154,7 @@ function App() {
           {Qrscanner}
         </dialog>
       </header>
-      {Errorlog}
+      {/* {Errorlog}/ */}
     </div>
   );
 }
