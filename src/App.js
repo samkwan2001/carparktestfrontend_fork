@@ -350,7 +350,7 @@ function App() {
                   path: '/',
                   expires,
                 });
-              document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(Date.now() + parseInt(event.data));
+              document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(parseInt(event.data));
             }
           });
         }
@@ -555,7 +555,7 @@ function App() {
               if (moveing_time < 0)
                 document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(0);
               else if (moveing_time == 0)
-                document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(Date.now() + parseInt(cookie.load("need_wait")));
+                document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(parseInt(cookie.load("need_wait")));
               else
                 document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(moveing_time);
               queue_endtime = (params[4]);
