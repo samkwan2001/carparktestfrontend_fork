@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import logo from './ive_icon.png';
 import './App.css';
 import { useEffect, useState, CSSProperties } from "react";
@@ -120,7 +121,7 @@ function App() {
         console.log("qr", Qrscanner.paused);
         if (result.length === 1) {
           document.getElementById("qrresult").innerHTML = result[0].rawValue;
-          sessionStorage.setItem("qr",true);
+          sessionStorage.setItem("qr", true);
           sessionStorage.removeItem("finished");
           console.log("qr", window.location.href = (result[0].rawValue));
         } else {
@@ -128,8 +129,8 @@ function App() {
             console.log("qr", (new URL(result[i].rawValue)));
             const btn = document.createElement("button");
             btn.innerText = atob((new URL(result[i].rawValue)).pathname.replace("/", ""));
-            sessionStorage.setItem("qr",true);
-              sessionStorage.removeItem("finished");
+            sessionStorage.setItem("qr", true);
+            sessionStorage.removeItem("finished");
             btn.onclick = () => { window.location.href = (result[i].rawValue); }
             document.getElementById("qrresult").appendChild(btn);
           }
@@ -338,10 +339,19 @@ function App() {
             console.log("reconnect", new Date(), ":", event.type);
             start_eventSource();
           });
-          eventSource.addEventListener("need_wait",(event)=>{
-            console.log("need_wait", event.data,typeof event.data);
-            if(!isNaN(parseInt(event.data)))
-              document.getElementById("There are x minutes left to start charging").innerHTML=millis_to_time_String(Date.now()+parseInt(event.data));
+          eventSource.addEventListener("need_wait", (event) => {
+            console.log("need_wait", event.data, typeof event.data);
+            if (!isNaN(parseInt(event.data))) {
+              const expires = new Date(Date.now() + 5000);
+              cookie.save(
+                'need_wait',
+                event.data,
+                {
+                  path: '/',
+                  expires,
+                });
+              document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(Date.now() + parseInt(event.data));
+            }
           });
         }
         start_eventSource();
@@ -389,10 +399,10 @@ function App() {
     useEffect_lock = true; console.log(useEffect_lock);
     console.log("useEffect");
 
-    console.log('sessionStorage.getItem("finished")',sessionStorage.getItem("finished"),typeof sessionStorage.getItem("finished"));
+    console.log('sessionStorage.getItem("finished")', sessionStorage.getItem("finished"), typeof sessionStorage.getItem("finished"));
     console.log(performance.navigation.type)
 
-    
+
     console.log(
       `(
       (${performance.navigation.type}==0 && !${sessionStorage.getItem("qr")}// * (user replace new link or duplicate tab)
@@ -421,9 +431,9 @@ function App() {
         && sessionStorage.getItem("id")                                // * and this_page id exists
       ) || sessionStorage.getItem("finished") !== null                 // * or this_page finished
     ) sessionStorage.setItem("id", sessionStorage.getItem("id") - 1)    // * then set this_page id to this_page id - 1
-    sessionStorage.setItem("qr",false);
+    sessionStorage.setItem("qr", false);
     //if          no this_page id    or replace link by scanning QRcode   then set this_page id to Date.now()
-    if (!sessionStorage.getItem("id")||sessionStorage.getItem("qr")) sessionStorage.setItem("id", Date.now())
+    if (!sessionStorage.getItem("id") || sessionStorage.getItem("qr")) sessionStorage.setItem("id", Date.now())
     //if     no Latest_id      or              Latest_id < this_page id                then set cookie Latest_id to this_page id
     if (!cookie.load("Latest_id") || cookie.load("Latest_id") < sessionStorage.getItem("id")) cookie.save("Latest_id", sessionStorage.getItem("id"));
     let check_Latest = (..._) => {
@@ -541,7 +551,13 @@ function App() {
             const time = (params[2] - new Date(Date.now()).getTime());
             if (params[1] == 1 && params[4] && Date.now() < params[4]) {
               const moveing_time = (params[4] - new Date(Date.now()).getTime());
-              document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(moveing_time < 0 ? 0 : moveing_time);
+              // document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(moveing_time < 0 ? 0 : moveing_time);
+              if (moveing_time < 0)
+                document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(0);
+              else if (moveing_time == 0)
+                document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(Date.now() + parseInt(cookie.load("need_wait")));
+              else
+                document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(moveing_time);
               queue_endtime = (params[4]);
               document.getElementById("InQueue_state_text").innerHTML = translations[language].moving;
               document.getElementById("your_queue_num_text").style.display = "none";
