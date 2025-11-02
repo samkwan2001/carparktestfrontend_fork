@@ -24,7 +24,7 @@ const translations = {
     people: "個",
     youNeedToWait: "你要等",
     continue: "繼續",
-    cheapestIndoorParking: "全香港最平便宜的室內停車場",
+    cheapestIndoorParking: "IVE Engineering室內停車場",
     chargingTime: "充電時間:",
     minutes: "(分鐘)",
     totalPrice: "充電{chargingTime}分鐘，總費用為{price}元。",
@@ -189,8 +189,8 @@ function App() {
   let interval;
   let not_time_to_fetchData = true; // Flag to control data fetching timing
   // // const API_BASE_URL = 'https://carparkvercelbackend.vercel.app';
-  const API_BASE_URL = window.location.hostname.match(/-wall-c/) ? 'https://carparkvercelbackend-wall-c.vercel.app' : 'https://express-flame-two.vercel.app';
-  // const API_BASE_URL = 'http://localhost:7000';
+  // const API_BASE_URL = window.location.hostname.match(/-wall-c/) ? 'https://carparkvercelbackend-wall-c.vercel.app' : 'https://express-flame-two.vercel.app';
+  const API_BASE_URL = 'http://localhost:7000';
   const backend = axios.create({
     baseURL: API_BASE_URL,
     timeout: 5000,
@@ -213,7 +213,7 @@ function App() {
         not_time_to_fetchData = !((await backend.get("/is_pack_available")).data.answer)
         if (not_time_to_fetchData) throw new Error("not time to fetchData");
         let output = [];
-        if(sessionStorage.getItem("finished") !== null)throw new Error("session finished");
+        if (sessionStorage.getItem("finished") !== null) throw new Error("session finished");
         const carNum_response = await backend.get("/", {
           params: {
             'Parking Space Num': _carNum,
@@ -330,9 +330,12 @@ function App() {
               );
           };
           eventSource.onerror = (error) => {
-            console.log(`eventSource error: ${error}`);
-            start_eventSource();
-            console.log(`start_eventSource finfsh`);
+            console.log(`eventSource error: `, error);
+            if (sessionStorage.getItem("finished") === null)
+              setTimeout(() => {
+                start_eventSource();
+                console.log(`start_eventSource finfsh`);
+              }, 3000);
           };
 
           eventSource.addEventListener('reconnect', (event) => {
@@ -354,6 +357,10 @@ function App() {
               document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(parseInt(event.data));
             }
           });
+          eventSource.addEventListener("park", (event) => {
+            console.log(event.data);
+            console.log(JSON.parse(event.data));
+          })
         }
         start_eventSource();
       }
