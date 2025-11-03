@@ -189,8 +189,8 @@ function App() {
   let interval;
   let not_time_to_fetchData = true; // Flag to control data fetching timing
   // // const API_BASE_URL = 'https://carparkvercelbackend.vercel.app';
-  // const API_BASE_URL = window.location.hostname.match(/-wall-c/) ? 'https://carparkvercelbackend-wall-c.vercel.app' : 'https://express-flame-two.vercel.app';
-  const API_BASE_URL = 'http://localhost:7000';
+  const API_BASE_URL = window.location.hostname.match(/-wall-c/) ? 'https://carparkvercelbackend-wall-c.vercel.app' : 'https://express-flame-two.vercel.app';
+  // const API_BASE_URL = 'http://localhost:7000';
   const backend = axios.create({
     baseURL: API_BASE_URL,
     timeout: 5000,
