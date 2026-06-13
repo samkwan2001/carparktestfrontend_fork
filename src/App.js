@@ -1,13 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import logo from './ive_icon.png';
 import './App.css';
-import { useEffect, useState, CSSProperties } from "react";
+import { useEffect, useState, useRef, CSSProperties } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faL, fas } from '@fortawesome/free-solid-svg-icons';
 import cookie from 'react-cookies';
 import { ClipLoader } from "react-spinners";
 import axios from 'axios';
 import { Scanner } from '@yudiel/react-qr-scanner';
+import { WebRTCEventSource } from "./WebRTCEventSource"
 
 const override/*: CSSProperties*/ = {
   display: "block",
@@ -152,7 +153,14 @@ function App() {
     ranking: null,
     movingTime: null,
     remainingChargeTime: null,
+    clock:Date.now()
   });
+  const dynamicValuesRef = useRef(dynamicValues);
+  const [need_wait, setneed_wait] = useState(0);
+  const [ChargerArriveTime, setChargerArriveTime] = useState(0);
+  const ChargerArriveTimeRef = useRef(ChargerArriveTime);
+  const [queueTime, setqueueTime] = useState(0);
+
   // New: State to control visibility of language toggle button
   const [showLanguageButton, setShowLanguageButton] = useState(true);
 
@@ -210,7 +218,8 @@ function App() {
     while (1) {
       try {
         console.log("try time get data from backend");
-        not_time_to_fetchData = !((await backend.get("/is_pack_available")).data.answer)
+        // not_time_to_fetchData = !((await backend.get("/is_pack_available")).data.answer)
+        not_time_to_fetchData = false;
         if (not_time_to_fetchData) throw new Error("not time to fetchData");
         let output = [];
         if (sessionStorage.getItem("finished") !== null) throw new Error("session finished");
@@ -273,7 +282,8 @@ function App() {
         ) return;
         else clearInterval(eventMTloop);
         function start_eventSource() {
-          eventSource = new EventSource(`${API_BASE_URL}/events?_id="${cookie.load("_id")}"`);
+          // eventSource = new EventSource(`${API_BASE_URL}/events?_id="${cookie.load("_id")}"`);
+          eventSource = new WebRTCEventSource(API_BASE_URL, { clientId: cookie.load("_id") });
           console.log("eventSource", eventSource);
           eventSource.onmessage = (event) => {
             const data = (event.data);
@@ -354,7 +364,36 @@ function App() {
                   path: '/',
                   expires,
                 });
-              document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(parseInt(event.data));
+                
+              setneed_wait(millis_to_time_String(parseInt(event.data)));
+              // setChargerArriveTime(Date.now() + (parseInt(event.data)));
+              setDynamicValues(prev => ({
+                ...prev,
+                movingTime: parseInt(event.data) < 0 ? 0 : parseInt(event.data),
+                ranking: null,
+              }));
+              console.log("setDynamicValues", "movingTime", event.data < 0 ? 0 : event.data);
+            }
+          });
+          eventSource.addEventListener("ChargerArriveTime", (event) => {
+            console.log("ChargerArriveTime", event.data, typeof event.data);
+            if (!isNaN(parseInt(event.data))) {
+              const expires = new Date(Date.now() + 5000);
+              cookie.save(
+                'ChargerArriveTime',
+                event.data,
+                {
+                  path: '/',
+                  expires,
+                });
+                
+              setChargerArriveTime((parseInt(event.data)));
+              // setDynamicValues(prev => ({
+              //   ...prev,
+              //   movingTime: parseInt(event.data) < 0 ? 0 : parseInt(event.data),
+              //   ranking: null,
+              // }));
+              // console.log("setDynamicValues", "movingTime", event.data < 0 ? 0 : event.data);
             }
           });
           eventSource.addEventListener("park", (event) => {
@@ -464,15 +503,15 @@ function App() {
     document.getElementById("pack_not_available_dialog")["programed_close"] = false;
     // Check if the session finished is not defined
     if (sessionStorage.getItem("finished") === null)
-      backend.get("/is_pack_available").then((response) => {
-        if (!response.data)
-          if (document.getElementById("pack_not_available_dialog"))
-            document.getElementById("pack_not_available_dialog").showModal();
-        console.log("is_pack_available", response.data);
-        not_time_to_fetchData = !check_Latest() || !response.data;
-        console.log(`${not_time_to_fetchData}=${!check_Latest()}||${!response.data};`);
-      });
-    else { document.getElementById("link_not_believable_dialog").showModal(); setQrscanner_paused(false); }
+      // backend.get("/is_pack_available").then((response) => {
+      //   if (!response.data)
+      //     if (document.getElementById("pack_not_available_dialog"))
+      //       document.getElementById("pack_not_available_dialog").showModal();
+      //   console.log("is_pack_available", response.data);
+      //   not_time_to_fetchData = !check_Latest() || !response.data;
+      //   console.log(`${not_time_to_fetchData}=${!check_Latest()}||${!response.data};`);
+      // });
+      ; else { document.getElementById("link_not_believable_dialog").showModal(); setQrscanner_paused(false); }
     if (document.getElementById("pack_not_available_dialog"))
       document.getElementById("loading繼續").style.height = document.getElementById("after_cookie").style.height;
     console.log(document.getElementById("after_cookie").style);
@@ -514,7 +553,7 @@ function App() {
             document.getElementById("There are x in front").innerHTML = params[1] - 1;
             const time = (params[2] - new Date(Date.now()).getTime());
             console.log(`(${params[2]} - ${new Date(Date.now()).getTime()})`);
-            document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(time < 0 ? 0 : time);
+            setqueueTime(millis_to_time_String(time < 0 ? 0 : time));
             queue_endtime = (params[2]);
             // New: Store dynamic values for language toggle
             setDynamicValues(prev => ({
@@ -559,13 +598,20 @@ function App() {
             const time = (params[2] - new Date(Date.now()).getTime());
             if (params[1] == 1 && params[4] && Date.now() < params[4]) {
               const moveing_time = (params[4] - new Date(Date.now()).getTime());
-              // document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(moveing_time < 0 ? 0 : moveing_time);
-              if (moveing_time < 0)
-                document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(0);
-              else if (moveing_time == 0)
-                document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(parseInt(cookie.load("need_wait")));
-              else
-                document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(moveing_time);
+              setneed_wait(millis_to_time_String(moveing_time < 0 ? 0 : moveing_time));
+              // setChargerArriveTime(Date.now() + (moveing_time < 0 ? 0 : moveing_time));
+              if (moveing_time < 0) {
+                setneed_wait(millis_to_time_String(0));
+                // setChargerArriveTime(Date.now());
+              }
+              else if (moveing_time == 0) {
+                setneed_wait(millis_to_time_String(parseInt(cookie.load("need_wait"))));
+                // setChargerArriveTime(Date.now() + (parseInt(cookie.load("need_wait"))));
+              }
+              else {
+                setneed_wait(millis_to_time_String(moveing_time));
+                // setChargerArriveTime(Date.now() + (moveing_time));
+              }
               queue_endtime = (params[4]);
               document.getElementById("InQueue_state_text").innerHTML = translations[language].moving;
               document.getElementById("your_queue_num_text").style.display = "none";
@@ -578,15 +624,16 @@ function App() {
                 movingTime: moveing_time < 0 ? 0 : moveing_time,
                 ranking: null,
               }));
+              console.log("setDynamicValues", "movingTime", moveing_time < 0 ? 0 : moveing_time,);
             } else {
-              document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(time < 0 ? 0 : time);
+              setneed_wait(millis_to_time_String(time < 0 ? 0 : time));
+              // setChargerArriveTime(Date.now() + (time < 0 ? 0 : time));
               queue_endtime = (params[2]);
               // New: Store ranking and queue time
               setDynamicValues(prev => ({
                 ...prev,
                 ranking: params[1],
                 queueTime: time < 0 ? 0 : time,
-                movingTime: null,
               }));
             }
           }
@@ -639,8 +686,13 @@ function App() {
     interval = setInterval(countdown_loop, 0);
     clearInterval(interval);
     let fetched = false;
-    countdown_loop = () => {
+    countdown_loop = ({ dynamicValues, ChargerArriveTime }) => {
       if (document.getElementById("SelectChargingTime").style.display != "none") return;
+      setDynamicValues(prev => ({
+                ...prev,
+                clock: Date.now(),
+              }));
+      console.log("ChargerArriveTime", ChargerArriveTime);
       if (charge_endtime && charge_endtime > 0) {
         const newTime = charge_endtime - new Date(Date.now()).getTime();
         if (newTime <= 0) {
@@ -656,25 +708,37 @@ function App() {
         }
       }
       const newTime = queue_endtime - new Date(Date.now()).getTime();
-      if (document.getElementById("There are x minutes left to start charging")) {
-        if (newTime && newTime > 0)
-          // document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(newTime);
-          // else document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(0);
+      console.log(dynamicValues);
+      console.log(dynamicValuesRef.current);
+      if (true) {
+        if (newTime && newTime > 0) {
+          console.log(dynamicValues);
           // New: Update stored queue or moving time
           setDynamicValues(prev => ({
             ...prev,
             [prev.movingTime != null ? 'movingTime' : 'queueTime']: newTime < 0 ? 0 : newTime,
           }));
+          console.log("setDynamicValues", "movingTime", newTime < 0 ? 0 : newTime);
+        }
       }
-      if (document.getElementById("You need to wait x minutes")) {
-        if (newTime && newTime > 0)
-          // document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(newTime);
-          // else document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(0);
+      if (dynamicValuesRef.current.movingTime && dynamicValuesRef.current.movingTime > 0) {
+        console.log(dynamicValues);
+        // New: Update stored queue or moving time
+        setDynamicValues(prev => ({
+          ...prev,
+          [prev.movingTime != null ? 'movingTime' : 'queueTime']: prev.movingTime < 0 ? 0 : prev.movingTime - 1,
+        }));
+        console.log("setDynamicValues", "movingTime", "prev.movingTime < 0 ? 0 : prev.movingTime - 1");
+      }
+      if (true) {
+        if (newTime && newTime > 0) {
+          console.log(dynamicValues);
           // New: Update stored queue time
           setDynamicValues(prev => ({
             ...prev,
             queueTime: newTime < 0 ? 0 : newTime,
           }));
+        }
       }
       if (newTime && newTime < 0 && cookie.load("_id")) {
         if ((
@@ -715,7 +779,7 @@ function App() {
         console.log("stop interval because sessionStorage finished");
       }
     };
-    interval = setInterval(countdown_loop, 1000);
+    interval = setInterval(countdown_loop, 1000, { dynamicValues: dynamicValues, ChargerArriveTime: ChargerArriveTime });
     document.getElementById("confirmText").style.display = "none";
     document.getElementById("confirmButtons").style.display = "none";
     document.getElementById("chargingStopped").style.display = "none";
@@ -742,13 +806,10 @@ function App() {
     if (document.getElementById("There are x in front") && dynamicValues.queuePosition != null) {
       document.getElementById("There are x in front").innerHTML = dynamicValues.queuePosition;
     }
-    if (document.getElementById("You need to wait x minutes") && dynamicValues.queueTime != null) {
-      document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(dynamicValues.queueTime);
-    }
-
+    if (dynamicValues.queueTime != null) setqueueTime(millis_to_time_String(dynamicValues.queueTime));
     // Update queuing screen
     if (document.getElementById("InQueue_state_text")) {
-      document.getElementById("InQueue_state_text").innerHTML = dynamicValues.movingTime != null
+      document.getElementById("InQueue_state_text").innerHTML = dynamicValuesRef.current.movingTime != null
         ? translations[language].moving
         : translations[language].queuing;
     }
@@ -764,10 +825,13 @@ function App() {
     if (document.getElementById("Remaining time moving to")) {
       document.getElementById("Remaining time moving to").innerHTML = translations[language].movingToSpot;
     }
-    if (document.getElementById("There are x minutes left to start charging")) {
-      const time = dynamicValues.movingTime != null ? dynamicValues.movingTime : dynamicValues.queueTime;
+    if (true) {
+      // const time = dynamicValuesRef.current.movingTime != null ? dynamicValuesRef.current.movingTime : dynamicValues.queueTime;
+      // const time = dynamicValues.movingTime != null ? dynamicValues.movingTime : dynamicValues.queueTime;
+      const time = ChargerArriveTime-Date.now();
       if (time != null) {
-        document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(time);
+        console.log(ChargerArriveTime,dynamicValues);
+        setneed_wait(millis_to_time_String(time));
       }
     }
 
@@ -778,8 +842,8 @@ function App() {
 
     // Update total price
     updateTotalPrice();
-
-  }, [language, dynamicValues]);
+    
+  }, [language, dynamicValues, need_wait, ChargerArriveTime]);
 
   function goto(v) {
     return (a) => {
@@ -1040,7 +1104,7 @@ function App() {
                   <td>{translations[language].people}</td>
                   <td style={{ padding: 10 + "px" }}></td>
                   <td>{translations[language].youNeedToWait}</td>
-                  <td><p id="You need to wait x minutes">X</p></td>
+                  <td><p>{queueTime}</p></td>
                 </tr>
               </tbody>
             </table>
@@ -1096,7 +1160,7 @@ function App() {
               <td style={{ padding: 10 + "px" }}></td>
               <td id="waitting_time_has">{translations[language].timeToStartCharging}</td>
               <td id="Remaining time moving to" style={{ display: "none" }}>{translations[language].movingToSpot}</td>
-              <td><p id="There are x minutes left to start charging">X</p></td>
+              <td><p>{need_wait}</p></td>
             </tr>
           </table>
           <button id="cancelbtn" onClick={cancel()}>{translations[language].cancel}</button>
